@@ -1,4 +1,4 @@
-package com.myopengl.zcweicheng;
+package com.myopengl.zcweicheng.ui;
 
 import android.app.Activity;
 import android.graphics.Matrix;
@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 
+import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.gles.MiscUtils;
 import com.myopengl.zcweicheng.gles.MoviePlayer;
 import com.myopengl.zcweicheng.gles.MoviePlayer.PlayerFeedback;

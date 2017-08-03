@@ -1,4 +1,4 @@
-package com.myopengl.zcweicheng;
+package com.myopengl.zcweicheng.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.gles.ContentManager;
 
 public class MainActivity extends Activity {
