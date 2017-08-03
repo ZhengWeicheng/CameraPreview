@@ -113,7 +113,7 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
         mInputTexture.getTransformMatrix(mTmpMatrix);
         GLES20.glViewport(0, 0, mWidth, mHeight);
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
-        drawExtra(mFrameNum, mWidth, mHeight);
+//        drawExtra(mFrameNum, mWidth, mHeight);
         mDisplaySurface.swapBuffers();
 
         mFrameNum++;
