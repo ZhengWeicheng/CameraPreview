@@ -7,6 +7,7 @@ import android.view.Surface;
 
 import static com.myopengl.zcweicheng.render.VideoTextureRenderThread.MSG_INIT;
 import static com.myopengl.zcweicheng.render.VideoTextureRenderThread.MSG_RELEASE;
+import static com.myopengl.zcweicheng.render.VideoTextureRenderThread.MSG_SET_SCALE;
 
 /**
  * Created by zhengweicheng on 2017/8/1 0001.
@@ -23,7 +24,7 @@ public class VideoTextureRender {
     }
 
     public void setScale(boolean isScale) {
-        Message.obtain(mVideoTextureRenderThread.getHandler(), MSG_RELEASE, isScale).sendToTarget();
+        Message.obtain(mVideoTextureRenderThread.getHandler(), MSG_SET_SCALE, isScale).sendToTarget();
     }
 
     public void release() {
