@@ -22,6 +22,10 @@ public class VideoTextureRender {
                 MSG_INIT, new Object[] {outSurface, width, height, listener}).sendToTarget();
     }
 
+    public void setScale(boolean isScale) {
+        Message.obtain(mVideoTextureRenderThread.getHandler(), MSG_RELEASE, isScale).sendToTarget();
+    }
+
     public void release() {
         Message.obtain(mVideoTextureRenderThread.getHandler(), MSG_RELEASE).sendToTarget();
     }

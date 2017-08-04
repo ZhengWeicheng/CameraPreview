@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.WindowManager;
-import android.widget.TableRow;
 
 import com.myopengl.zcweicheng.MyApp;
 
@@ -37,9 +36,13 @@ public class CameraManager {
     private static final int MSG_INIT = 1;
     private static final int MSG_STOP = 2;
 
-    private static final int ERROR_PERMISSION_DENY = 1;
-    private static final int ERROR_CAMERA_INITIALIZED = 2;
-    private static final int ERROR_CAMERA_OPEN_ERROR = 3;
+    public static final int ERROR_PERMISSION_DENY = 1;
+    public static final int ERROR_CAMERA_INITIALIZED = 2;
+    public static final int ERROR_CAMERA_OPEN_ERROR = 3;
+
+    public static final int MODE_PREVIEW_DATA = 1;
+    public static final int MODE_PREVIEW_TEXTURE = 2;
+
     private CameraThread mCameraThread;
     private static final class CameraMangerHolder {
         static final CameraManager sINSTANCE = new CameraManager();
@@ -53,14 +56,20 @@ public class CameraManager {
         mCameraThread = new CameraThread();
     }
 
-    public void startCamera(Activity activity, int expectWidth, int expectHeight, @NonNull CameraStateListener listener) {
+    public void startCamera(Activity activity, int expectWidth, int expectHeight, int mode,
+                            @NonNull CameraStateListener listener) {
+        startCamera(activity, expectWidth, expectHeight, mode, null, listener);
+    }
+
+    public void startCamera(Activity activity, int expectWidth, int expectHeight, int mode,
+                            SurfaceTexture outputTexture, @NonNull CameraStateListener listener) {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             listener.onError(ERROR_PERMISSION_DENY);
             return;
         }
         Message.obtain(mCameraThread.mHandler, MSG_INIT,
-                new Object[] {expectWidth, expectHeight, listener}).sendToTarget();
+                new Object[] {expectWidth, expectHeight, mode, outputTexture, listener}).sendToTarget();
     }
 
     public void stopCamera() {
@@ -76,7 +85,7 @@ public class CameraManager {
     private static class CameraThread extends HandlerThread implements Handler.Callback, Camera.PreviewCallback {
 
         private Handler mHandler;
-        private Camera mCamera;
+        private Camera mCamera = null;
         private int mWidth;
         private int mHeight;
         private int mCameraIndex;
@@ -88,6 +97,7 @@ public class CameraManager {
         private boolean isFocusing;
         private boolean exited;
         private DataCallback mDataCallback;
+        private int mPreviewMode;
 
         public CameraThread() {
             super("camera thread");
@@ -115,7 +125,7 @@ public class CameraManager {
             Log.w(TAG, "摄像头开始初始化");
             boolean init = false;
             Object[] objects = (Object[]) msg.obj;
-            CameraStateListener listener = (CameraStateListener) objects[2];
+            CameraStateListener listener = (CameraStateListener) objects[4];
             synchronized (this) {
                 if (mCamera != null) {
                     Log.e(TAG, "initCamera 初始化摄像头时,摄像头已经初始化过了！");
@@ -126,6 +136,7 @@ public class CameraManager {
             }
             int expectedWidth = (int) objects[0];
             int expectedHeight = (int) objects[1];
+            mPreviewMode = (int) objects[2];
             try {
                 mCamera = Camera.open(mCameraIndex);
             } catch (Exception e) {
@@ -197,19 +208,25 @@ public class CameraManager {
                 }
 //                    params.setRecordingHint(true);
                 mCamera.setParameters(params);
+                exited = false;
                 //记录宽高
                 params = mCamera.getParameters();
                 mWidth = params.getPreviewSize().width;
                 mHeight = params.getPreviewSize().height;
-                int size = mWidth * mHeight;
-                size = size * ImageFormat.getBitsPerPixel(params.getPreviewFormat()) / 8;
-                mVideoBuffer = new ByteBuffer[2];
-                mVideoBuffer[0] = ByteBuffer.allocate(size);
-                mVideoBuffer[1] = ByteBuffer.allocate(size);
-                mSurfaceTexture = new SurfaceTexture(1);
-                exited = false;
-                mCamera.addCallbackBuffer(mVideoBuffer[mVideoBufferIdx].array());
-                mCamera.setPreviewCallbackWithBuffer(this);
+
+                mSurfaceTexture = (SurfaceTexture) objects[3];
+                if (mSurfaceTexture == null) {
+                    mSurfaceTexture = new SurfaceTexture(1);
+                }
+                if (mPreviewMode == MODE_PREVIEW_DATA) {
+                    int size = mWidth * mHeight;
+                    size = size * ImageFormat.getBitsPerPixel(params.getPreviewFormat()) / 8;
+                    mVideoBuffer = new ByteBuffer[2];
+                    mVideoBuffer[0] = ByteBuffer.allocate(size);
+                    mVideoBuffer[1] = ByteBuffer.allocate(size);
+                    mCamera.addCallbackBuffer(mVideoBuffer[mVideoBufferIdx].array());
+                    mCamera.setPreviewCallbackWithBuffer(this);
+                }
                 mCamera.setPreviewTexture(mSurfaceTexture);
                 Log.d(TAG, params.flatten());
                 mCamera.startPreview();
@@ -232,7 +249,8 @@ public class CameraManager {
                 releaseObject();
                 Log.w(TAG, "摄像头初始化失败！");
             }
-            listener.onSuccess(init, mSurfaceTexture, mWidth, mHeight);
+            listener.onSuccess(init, mPreviewMode == MODE_PREVIEW_DATA ? null : mSurfaceTexture,
+                    mWidth, mHeight);
         }
 
         @Override
@@ -290,7 +308,7 @@ public class CameraManager {
             setCameraDegreeByWindowRotation(wm.getDefaultDisplay().getRotation());
         }
 
-        public void setCameraDegreeByWindowRotation(int windowRotation) {
+        private void setCameraDegreeByWindowRotation(int windowRotation) {
             int mWindowDegree = 0;
             switch (windowRotation) {
                 case Surface.ROTATION_0:
@@ -345,7 +363,7 @@ public class CameraManager {
             return new CameraSize(calcWidth, calcHeight);
         }
 
-        public void doTouchFocus(MotionEvent event) {
+        private void doTouchFocus(MotionEvent event) {
             if (mCamera == null || isFocusing) {
                 return;
             }

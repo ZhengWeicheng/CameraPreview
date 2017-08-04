@@ -22,13 +22,23 @@ public class MainActivity extends Activity {
             ContentManager.getInstance().createAll(this);
         }
 
-        Button button = (Button) findViewById(R.id.play_video);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button button1 = (Button) findViewById(R.id.play_video);
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, PlayVideoActivity.class));
             }
         });
+
+        Button button2 = (Button) findViewById(R.id.camera_preview);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CameraPreviewActivity.class));
+            }
+        });
+
+
     }
 
 }

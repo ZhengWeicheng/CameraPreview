@@ -2,6 +2,7 @@ package com.myopengl.zcweicheng.render;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -23,6 +24,7 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
 
     public static final int MSG_INIT = 1;
     public static final int MSG_RELEASE = 2;
+    public static final int MSG_SET_SCALE = 3;
     private static final String TAG = "RenderThread";
 
     private Handler mHandler;
@@ -36,11 +38,13 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
     private SurfaceTexture mInputTexture;
     private final float[] mTmpMatrix = new float[16];
     private int mFrameNum;
+    private boolean isScale;
     private VideoTextureRenderListener mListener;
 
     public VideoTextureRenderThread() {
         super("VideoTextureRenderThread");
         start();
+        isScale = false;
         mHandler = new Handler(Looper.myLooper(), this);
     }
 
@@ -56,6 +60,9 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
                 return true;
             case MSG_RELEASE:
                 release();
+                return true;
+            case MSG_SET_SCALE:
+                isScale = (boolean) msg.obj;
                 return true;
         }
         return false;
@@ -80,6 +87,7 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
 
     private void release() {
         mListener = null;
+        isScale = false;
         if (mInputTexture != null) {
             mInputTexture.release();
             mInputTexture = null;
@@ -112,6 +120,9 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
         mInputTexture.updateTexImage();
         mInputTexture.getTransformMatrix(mTmpMatrix);
         GLES20.glViewport(0, 0, mWidth, mHeight);
+        if (isScale) {
+            Matrix.scaleM(mTmpMatrix, 0, 1f*mWidth/mHeight, 1f, 1f);
+        }
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
 //        drawExtra(mFrameNum, mWidth, mHeight);
         mDisplaySurface.swapBuffers();
