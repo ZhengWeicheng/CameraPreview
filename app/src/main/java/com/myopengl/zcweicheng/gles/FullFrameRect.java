@@ -86,4 +86,13 @@ public class FullFrameRect {
                 texMatrix, mRectDrawable.getTexCoordArray(), textureId,
                 mRectDrawable.getTexCoordStride());
     }
+
+    public void drawFrame(int textureId, float[] verMatrix, float[] texMatrix) {
+        // Use the identity matrix for MVP so our 2x2 FULL_RECTANGLE covers the viewport.
+        mProgram.draw(verMatrix, mRectDrawable.getVertexArray(), 0,
+                mRectDrawable.getVertexCount(), mRectDrawable.getCoordsPerVertex(),
+                mRectDrawable.getVertexStride(),
+                texMatrix, mRectDrawable.getTexCoordArray(), textureId,
+                mRectDrawable.getTexCoordStride());
+    }
 }

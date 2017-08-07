@@ -7,15 +7,10 @@ const vec4 bkColor = vec4(0.5, 0.5, 0.5, 1.0);
 const highp vec3 W = vec3(0.2125, 0.7154, 0.0721);
 void main() {
     vec2 tc = vTextureCoord.xy;
-    tc.y *= 1180.f;
-    tc.y -= 590.f;
     float dist = length(tc.y);
-    if (dist > 250.f) {
+    if (dist > 0.5f) {
         gl_FragColor = texture2D(texture, vTextureCoord);
     } else {
-//        tc += center;
-        tc.y += 590.f;
-        tc.y /= 1180.f;
         float luminance = dot(texture2D(texture, tc).rgb, W);
         gl_FragColor = vec4(vec3(luminance), 0.0) + bkColor;
     }

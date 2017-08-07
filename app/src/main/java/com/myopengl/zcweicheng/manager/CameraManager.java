@@ -82,6 +82,10 @@ public class CameraManager {
         mCameraThread.mDataCallback = dataCallback;
     }
 
+    public int getCameraIndex() {
+        return mCameraThread != null ? mCameraThread.mCameraIndex : -1;
+    }
+
     private static class CameraThread extends HandlerThread implements Handler.Callback, Camera.PreviewCallback {
 
         private Handler mHandler;
@@ -102,7 +106,7 @@ public class CameraManager {
         public CameraThread() {
             super("camera thread");
             start();
-            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
             mHandler = new Handler(Looper.myLooper(), this);
         }
 

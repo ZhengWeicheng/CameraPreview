@@ -1,6 +1,7 @@
 package com.myopengl.zcweicheng.render;
 
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Handler;
@@ -14,13 +15,13 @@ import com.myopengl.zcweicheng.gles.EglCore;
 import com.myopengl.zcweicheng.gles.FullFrameRect;
 import com.myopengl.zcweicheng.gles.Texture2dProgram;
 import com.myopengl.zcweicheng.gles.WindowSurface;
-import com.myopengl.zcweicheng.render.VideoTextureRender.VideoTextureRenderListener;
+import com.myopengl.zcweicheng.manager.CameraManager;
 
 /**
- * Created by zhengweicheng on 2017/8/1 0001.
+ * Created by zhengweicheng on 2017/8/7 0007.
  */
 
-public class VideoTextureRenderThread extends HandlerThread implements Handler.Callback, SurfaceTexture.OnFrameAvailableListener {
+public class CameraTextureThread extends HandlerThread implements Handler.Callback, SurfaceTexture.OnFrameAvailableListener {
 
     public static final int MSG_INIT = 1;
     public static final int MSG_RELEASE = 2;
@@ -39,11 +40,20 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
     private final float[] mTmpMatrix = new float[16];
     private int mFrameNum;
     private boolean isScale;
-    private VideoTextureRenderListener mListener;
+    private CameraTextureRender.CameraTextureRenderListener mListener;
+    private int mCameraIndex;
 
-    public VideoTextureRenderThread() {
+    public static final float[] mverMatrix;
+    static {
+        mverMatrix = new float[16];
+        Matrix.setIdentityM(mverMatrix, 0);
+        Matrix.rotateM(mverMatrix, 0, 180, 0.0f, 0.0f, 1.0f);
+    }
+
+    public CameraTextureThread() {
         super("VideoTextureRenderThread");
         start();
+        isScale = false;
         mHandler = new Handler(Looper.myLooper(), this);
     }
 
@@ -72,12 +82,13 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
         mOutputSurface = (Surface) objects[0];
         mWidth = (int) objects[1];
         mHeight = (int) objects[2];
-        mListener = (VideoTextureRenderListener) objects[3];
+        mCameraIndex = CameraManager.getInstance().getCameraIndex();
+        mListener = (CameraTextureRender.CameraTextureRenderListener) objects[3];
         mEglCore = new EglCore(null, EglCore.FLAG_RECORDABLE);
         mDisplaySurface = new WindowSurface(mEglCore, mOutputSurface, true);
         mDisplaySurface.makeCurrent();
         mFullFrameBlit = new FullFrameRect(
-                new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_EXT_BW));
+                new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_EXT));
         mTextureId = mFullFrameBlit.createTextureObject();
         mInputTexture = new SurfaceTexture(mTextureId);
         mInputTexture.setOnFrameAvailableListener(this);
@@ -109,7 +120,7 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        Log.d(TAG, "onFrameAvailable mWidth " + mWidth + " mHeight = " + mHeight);
+//        Log.d(TAG, "onFrameAvailable mWidth " + mWidth + " mHeight = " + mHeight);
         if (mEglCore == null) {
             Log.d(TAG, "Skipping drawFrame after shutdown");
             return;
@@ -119,26 +130,13 @@ public class VideoTextureRenderThread extends HandlerThread implements Handler.C
         mInputTexture.updateTexImage();
         mInputTexture.getTransformMatrix(mTmpMatrix);
         GLES20.glViewport(0, 0, mWidth, mHeight);
-        mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
-        drawExtra(mFrameNum, mWidth, mHeight);
+        if (isScale) {
+            Matrix.scaleM(mTmpMatrix, 0, 1f*480/720, 1f, 1f);
+        }
+        mFullFrameBlit.drawFrame(mTextureId, mverMatrix, mTmpMatrix);
         mDisplaySurface.swapBuffers();
 
         mFrameNum++;
     }
-
-    private void drawExtra(int frameNum, int width, int height) {
-        // We "draw" with the scissor rect and clear calls.  Note this uses window coordinates.
-        int val = frameNum % 3;
-        switch (val) {
-            case 0:  GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);   break;
-            case 1:  GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);   break;
-            case 2:  GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);   break;
-        }
-
-        int xpos = (int) (width * ((frameNum % 100) / 100.0f));
-        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-        GLES20.glScissor(xpos, 0, width / 10, height / 10);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
-    }
 }
+

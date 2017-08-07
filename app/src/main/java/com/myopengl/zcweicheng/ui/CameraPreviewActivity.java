@@ -9,7 +9,8 @@ import android.view.TextureView;
 import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
-import com.myopengl.zcweicheng.render.VideoTextureRender;
+import com.myopengl.zcweicheng.render.CameraTextureRender;
+import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
 
 import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE;
 
@@ -19,7 +20,7 @@ import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE
 
 public class CameraPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
 
-    private VideoTextureRender mRender;
+    private CameraTextureRender mRender;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        mRender = new VideoTextureRender(new Surface(surface), width, height, new VideoTextureRender.VideoTextureRenderListener() {
+        mRender = new CameraTextureRender(new Surface(surface), width, height, new CameraTextureRenderListener() {
             @Override
             public void onInputTextureCreate(SurfaceTexture surfaceTexture, int width, int height) {
                 CameraManager.getInstance().startCamera(CameraPreviewActivity.this,
@@ -50,7 +51,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                         });
             }
         });
-        mRender.setScale(true);
+//        mRender.setScale(true);
     }
 
     @Override

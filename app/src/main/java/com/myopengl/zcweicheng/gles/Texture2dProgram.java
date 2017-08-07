@@ -148,6 +148,8 @@ public class Texture2dProgram {
                 mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_2D);
                 break;
             case TEXTURE_EXT:
+
+                //用于调试glsl文件
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
                 String vertex = AssetsUtils.getFromAssets("vertex.glsl");
                 String fragment = AssetsUtils.getFromAssets("ext_fragment.glsl");
