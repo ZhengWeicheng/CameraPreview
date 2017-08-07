@@ -23,6 +23,7 @@ package com.myopengl.zcweicheng.gles;
 public class FullFrameRect {
     private final Drawable2d mRectDrawable = new Drawable2d(Drawable2d.Prefab.FULL_RECTANGLE);
     private Texture2dProgram mProgram;
+    private float distance;
 
     /**
      * Prepares the object.
@@ -89,10 +90,15 @@ public class FullFrameRect {
 
     public void drawFrame(int textureId, float[] verMatrix, float[] texMatrix) {
         // Use the identity matrix for MVP so our 2x2 FULL_RECTANGLE covers the viewport.
+        mProgram.setDistance(distance);
         mProgram.draw(verMatrix, mRectDrawable.getVertexArray(), 0,
                 mRectDrawable.getVertexCount(), mRectDrawable.getCoordsPerVertex(),
                 mRectDrawable.getVertexStride(),
                 texMatrix, mRectDrawable.getTexCoordArray(), textureId,
                 mRectDrawable.getTexCoordStride());
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
     }
 }

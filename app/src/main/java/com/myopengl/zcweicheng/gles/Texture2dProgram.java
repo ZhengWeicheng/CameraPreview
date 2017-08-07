@@ -131,10 +131,13 @@ public class Texture2dProgram {
 
     private int mTextureTarget;
 
+    private final int muDistance;
+
     private float[] mKernel = new float[KERNEL_SIZE];
     private float[] mTexOffset;
     private float mColorAdjust;
 
+    private float distance;
 
     /**
      * Prepares the program in the current EGL context.
@@ -182,6 +185,7 @@ public class Texture2dProgram {
         muTexMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle, "uTexMatrix");
         GlUtil.checkLocation(muTexMatrixLoc, "uTexMatrix");
         muKernelLoc = GLES20.glGetUniformLocation(mProgramHandle, "uKernel");
+        muDistance = GLES20.glGetUniformLocation(mProgramHandle, "distance");
         if (muKernelLoc < 0) {
             // no kernel in this one
             muKernelLoc = -1;
@@ -277,6 +281,10 @@ public class Texture2dProgram {
         //Log.d(TAG, "filt size: " + width + "x" + height + ": " + Arrays.toString(mTexOffset));
     }
 
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
     /**
      * Issues the draw call.  Does the full setup on every call.
      *
@@ -292,6 +300,7 @@ public class Texture2dProgram {
      * @param texBuffer Buffer with vertex texture data.
      * @param texStride Width, in bytes, of the texture data for each vertex.
      */
+
     public void draw(float[] mvpMatrix, FloatBuffer vertexBuffer, int firstVertex,
                      int vertexCount, int coordsPerVertex, int vertexStride,
                      float[] texMatrix, FloatBuffer texBuffer, int textureId, int texStride) {
@@ -337,7 +346,9 @@ public class Texture2dProgram {
             GLES20.glUniform2fv(muTexOffsetLoc, KERNEL_SIZE, mTexOffset, 0);
             GLES20.glUniform1f(muColorAdjustLoc, mColorAdjust);
         }
-
+        if (muDistance >= 0) {
+            GLES20.glUniform1f(muDistance, distance);
+        }
         // Draw the rect.
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, firstVertex, vertexCount);
         GlUtil.checkGlError("glDrawArrays");

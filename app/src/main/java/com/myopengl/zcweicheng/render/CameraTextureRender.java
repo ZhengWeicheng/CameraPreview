@@ -7,6 +7,8 @@ import android.view.Surface;
 
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_INIT;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_RELEASE;
+import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_CAMERA_SIZE;
+import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_DISTANCE;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_SCALE;
 
 
@@ -29,6 +31,16 @@ public class CameraTextureRender {
 
     public void release() {
         Message.obtain(mCameraTextureThread.getHandler(), MSG_RELEASE).sendToTarget();
+    }
+
+    public void setCameraSize(int width, int height) {
+        Message.obtain(mCameraTextureThread.getHandler(), MSG_SET_CAMERA_SIZE,
+                new Object[] {width, height}).sendToTarget();
+    }
+
+    public void setDiff(float distance) {
+        Message.obtain(mCameraTextureThread.getHandler(), MSG_SET_DISTANCE,
+                distance).sendToTarget();
     }
 
     public interface CameraTextureRenderListener {

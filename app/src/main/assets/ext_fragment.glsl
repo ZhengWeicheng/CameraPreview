@@ -3,12 +3,13 @@
 precision mediump float;
 varying vec2 vTextureCoord;
 uniform samplerExternalOES texture;
+uniform float distance;
 const vec4 bkColor = vec4(0.5, 0.5, 0.5, 1.0);
 const highp vec3 W = vec3(0.2125, 0.7154, 0.0721);
 void main() {
     vec2 tc = vTextureCoord.xy;
     float dist = length(tc.y);
-    if (dist > 0.5f) {
+    if (dist >= distance) {
         gl_FragColor = texture2D(texture, vTextureCoord);
     } else {
         float luminance = dot(texture2D(texture, tc).rgb, W);

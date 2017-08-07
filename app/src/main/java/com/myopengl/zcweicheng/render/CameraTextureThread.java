@@ -26,6 +26,8 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     public static final int MSG_INIT = 1;
     public static final int MSG_RELEASE = 2;
     public static final int MSG_SET_SCALE = 3;
+    public static final int MSG_SET_CAMERA_SIZE = 4;
+    public static final int MSG_SET_DISTANCE = 5;
     private static final String TAG = "RenderThread";
 
     private Handler mHandler;
@@ -50,6 +52,10 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         Matrix.rotateM(mverMatrix, 0, 180, 0.0f, 0.0f, 1.0f);
     }
 
+    private int mCameraSurfaceWith;
+    private int mCameraSurfaceHeight;
+    private float mDistance;
+
     public CameraTextureThread() {
         super("VideoTextureRenderThread");
         start();
@@ -72,6 +78,14 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
                 return true;
             case MSG_SET_SCALE:
                 isScale = (boolean) msg.obj;
+                return true;
+            case MSG_SET_CAMERA_SIZE:
+                Object[] objects = (Object[]) msg.obj;
+                mCameraSurfaceWith = (int)objects[0];
+                mCameraSurfaceHeight = (int)objects[1];
+                return true;
+            case MSG_SET_DISTANCE:
+                mDistance = (float) msg.obj;
                 return true;
         }
         return false;
@@ -131,8 +145,9 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mInputTexture.getTransformMatrix(mTmpMatrix);
         GLES20.glViewport(0, 0, mWidth, mHeight);
         if (isScale) {
-            Matrix.scaleM(mTmpMatrix, 0, 1f*480/720, 1f, 1f);
+            Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
         }
+        mFullFrameBlit.setDistance(mDistance);
         mFullFrameBlit.drawFrame(mTextureId, mverMatrix, mTmpMatrix);
         mDisplaySurface.swapBuffers();
 

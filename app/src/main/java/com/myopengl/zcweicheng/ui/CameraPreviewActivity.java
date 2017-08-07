@@ -3,8 +3,11 @@ package com.myopengl.zcweicheng.ui;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 
 import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.manager.CameraManager;
@@ -21,6 +24,8 @@ import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE
 public class CameraPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
 
     private CameraTextureRender mRender;
+    private float startX, diff;
+    private boolean isLeft = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,6 +34,32 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
 
         TextureView textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
+        textureView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        diff = event.getX() - startX;
+                        isLeft = diff < 0;
+                        float distance = 1.f - event.getX()/720;
+                        if (mRender != null) {
+                            if (distance > 0.9) {
+                                distance = 1;
+                            } else if (distance < 0.1) {
+                                distance = 0;
+                            }
+                            mRender.setDiff(distance);
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -46,12 +77,12 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                             @Override
                             public void onSuccess(boolean isSuccess, SurfaceTexture surfaceTexture,
                                                   int width, int height) {
-
+                                mRender.setCameraSize(width, height);
                             }
                         });
             }
         });
-//        mRender.setScale(true);
+        mRender.setScale(true);
     }
 
     @Override
