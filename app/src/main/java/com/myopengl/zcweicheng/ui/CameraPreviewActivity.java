@@ -3,7 +3,6 @@ package com.myopengl.zcweicheng.ui;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
@@ -19,13 +18,13 @@ import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE
 
 /**
  * Created by zhengweicheng on 2017/8/4 0004.
+ *
  */
 
 public class CameraPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
 
     private CameraTextureRender mRender;
     private float startX, diff;
-    private boolean isLeft = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,14 +42,8 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                         break;
                     case MotionEvent.ACTION_MOVE:
                         diff = event.getX() - startX;
-                        isLeft = diff < 0;
-                        float distance = 1.f - event.getX()/720;
+                        float distance = diff/720;
                         if (mRender != null) {
-                            if (distance > 0.9) {
-                                distance = 1;
-                            } else if (distance < 0.1) {
-                                distance = 0;
-                            }
                             mRender.setDiff(distance);
                         }
                         break;
@@ -75,7 +68,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                             }
 
                             @Override
-                            public void onSuccess(boolean isSuccess, SurfaceTexture surfaceTexture,
+                            public void onSuccess(SurfaceTexture surfaceTexture,
                                                   int width, int height) {
                                 mRender.setCameraSize(width, height);
                             }

@@ -253,7 +253,7 @@ public class CameraManager {
                 releaseObject();
                 Log.w(TAG, "摄像头初始化失败！");
             }
-            listener.onSuccess(init, mPreviewMode == MODE_PREVIEW_DATA ? null : mSurfaceTexture,
+            listener.onSuccess(mPreviewMode == MODE_PREVIEW_DATA ? null : mSurfaceTexture,
                     mWidth, mHeight);
         }
 
@@ -456,11 +456,24 @@ public class CameraManager {
 
     }
 
-    public interface CameraStateListener{
+    public interface CameraStateListener {
+        /**
+         * 初始化相机失败
+         * @param errorType 错误类型
+         */
         void onError(int errorType);
-        void onSuccess(boolean isSuccess, SurfaceTexture surfaceTexture, int width, int height);
+
+        /**
+         * @param surfaceTexture 作为相机预览的texture
+         * @param width 相机的预览宽度
+         * @param height 相机预览的高度
+         */
+        void onSuccess(SurfaceTexture surfaceTexture, int width, int height);
     }
 
+    /**
+     * 当以相机previewCallback的形式预览时候，用该回调回调数据
+     */
     public interface DataCallback{
         void callback(byte[] data, int mWidth, int mHeight, int mCameraOrientation, int mCameraIndex);
     }
