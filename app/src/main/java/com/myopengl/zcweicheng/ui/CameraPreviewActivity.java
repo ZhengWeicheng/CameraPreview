@@ -26,7 +26,7 @@ import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE
 public class CameraPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
 
     private CameraTextureRender mRender;
-    private float startX, diff, lastDiff, distance;
+    private float startX, diff, distance;
     Handler handler;
     private int mWindowWidth;
     private int mCurrentFilterId = 0, mNextFilterId = 0;
@@ -36,7 +36,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_preview);
 
-        TextureView textureView = (TextureView) findViewById(R.id.preview_texture);
+        final TextureView textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
         handler = new Handler();
         mWindowWidth = getResources().getDisplayMetrics().widthPixels;
@@ -46,11 +46,10 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getX();
-                        handler.removeCallbacksAndMessages(null);
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        diff = event.getX() - startX + lastDiff;
-                        if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
+                        diff = event.getX() - startX;
+                        if ((diff < 0 && mCurrentFilterId == 4) || (diff > 0 && mCurrentFilterId == 0)) {
                             return false;
                         }
                         if ((diff > 0 && mCurrentFilterId == 5)) {
@@ -66,14 +65,14 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                             }
                         }
                         if (diff > 0) {
-                            diff = mWindowWidth - diff;
+//                            diff = mWindowWidth - diff;
+                            distance = (mWindowWidth - diff)/mWindowWidth;
+                        } else {
+                            distance = diff/mWindowWidth;
                         }
 
-                        distance = diff/mWindowWidth;
-
-                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
-                                + " distance = " + distance);
-
+//                        Log.d("aaa", " diff = " + diff + " distance = "
+//                                + distance + " mNextFilterId = " + mNextFilterId);
 
                         if (mRender != null) {
                             mRender.setDiff(distance, mNextFilterId);
@@ -83,59 +82,63 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                         if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
                             return false;
                         }
-                        lastDiff = diff;
+                        textureView.setEnabled(false);
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                if (Math.abs(diff) > mWindowWidth * 0.7) {
-                                    if (diff > 0 && distance < 1) {
-                                        distance = distance + 0.05f;
-                                        if (distance > 1) {
-                                            distance = 1;
-                                        }
-                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
-                                                + " distance = " + distance);
-                                        mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 50);
-                                    } else if (diff <= 0 && distance > -1) {
-                                        distance = distance - 0.05f;
-                                        if (distance < -1) {
-                                            distance = -1;
-                                        }
-                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
-                                                + " distance = " + distance);
-                                        mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 50);
-                                    } else {
-                                        lastDiff = 0;
-                                        mCurrentFilterId = mNextFilterId;
-                                    }
-                                } else if (Math.abs(diff) < mWindowWidth * 0.3) {
+                                if (Math.abs(diff) > mWindowWidth * 0.2) {
                                     if (diff > 0 && distance > 0) {
                                         distance = distance - 0.05f;
                                         if (distance < 0) {
                                             distance = 0;
                                         }
-                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
-                                                + " distance = " + distance);
+//                                        Log.d("aaa1", " diff = " + diff + " distance = "
+//                                                + distance + " mNextFilterId = " + mNextFilterId);
                                         mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 50);
-                                    } else if (diff <= 0 && distance < 0) {
+                                        handler.postDelayed(this, 10);
+                                    } else if (diff <= 0 && distance > -1) {
+                                        distance = distance - 0.05f;
+                                        if (distance < -1) {
+                                            distance = -1;
+                                        }
+//                                        Log.d("aaa2", " diff = " + diff + " distance = "
+//                                                + distance + " mNextFilterId = " + mNextFilterId);
+                                        mRender.setDiff(distance, mNextFilterId);
+                                        handler.postDelayed(this, 10);
+                                    } else {
+                                        mCurrentFilterId = mNextFilterId;
+                                        textureView.setEnabled(true);
+                                    }
+                                } else  {
+//                                    mNextFilterId = mCurrentFilterId;
+                                    if (diff > 0 && distance < 1) {
                                         distance = distance + 0.05f;
                                         if (distance > 1) {
                                             distance = 1;
                                         }
-                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
-                                                + " distance = " + distance);
+//                                        Log.d("aaa3", " diff = " + diff + " distance = "
+//                                                + distance + " mNextFilterId = " + mNextFilterId);
                                         mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 50);
+                                        handler.postDelayed(this, 10);
+                                    } else if (diff <= 0 && distance < 0) {
+                                        distance = distance + 0.02f;
+                                        if (distance >= 0) {
+                                            distance = 0;
+                                            mRender.setDiff(distance, mCurrentFilterId);
+                                        } else {
+//                                            Log.d("aaa4", " diff = " + diff + " distance = "
+//                                                    + distance + " mNextFilterId = " + mNextFilterId);
+                                            mRender.setDiff(distance, mNextFilterId);
+                                        }
+                                        handler.postDelayed(this, 10);
                                     } else {
-                                        lastDiff = 0;
-                                        mCurrentFilterId = mNextFilterId;
+//                                        mCurrentFilterId = mNextFilterId;
+                                        mNextFilterId = mCurrentFilterId;
+                                        textureView.setEnabled(true);
                                     }
                                 }
                             }
-                        }, 50);
+                        }, 10);
                         break;
                 }
                 return true;
@@ -174,6 +177,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         CameraManager.getInstance().stopCamera();
+        handler.removeCallbacksAndMessages(null);
         if (mRender != null) {
             mRender.release();
         }
