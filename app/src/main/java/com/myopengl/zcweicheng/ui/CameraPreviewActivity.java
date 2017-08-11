@@ -27,8 +27,9 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
 
     private CameraTextureRender mRender;
     private float startX, diff, lastDiff, distance;
-    private boolean isLeft = true;
     Handler handler;
+    private int mWindowWidth;
+    private int mCurrentFilterId = 0, mNextFilterId = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
         TextureView textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
         handler = new Handler();
+        mWindowWidth = getResources().getDisplayMetrics().widthPixels;
         textureView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -48,40 +50,88 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                         break;
                     case MotionEvent.ACTION_MOVE:
                         diff = event.getX() - startX + lastDiff;
-                        Log.d("aaa" , "diff = " + diff);
-                        distance = diff/720;
+                        if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
+                            return false;
+                        }
+                        if ((diff > 0 && mCurrentFilterId == 5)) {
+                            mNextFilterId = 4;
+                        } else if ((diff < 0 && mCurrentFilterId == 0)) {
+                            mNextFilterId = 1;
+                        } else {
+                            mNextFilterId = diff > 0 ? mCurrentFilterId - 1 : mCurrentFilterId + 1;
+                            if (mNextFilterId > 5) {
+                                mNextFilterId = 5;
+                            } else if (mNextFilterId < 0) {
+                                mNextFilterId = 0;
+                            }
+                        }
+                        if (diff > 0) {
+                            diff = mWindowWidth - diff;
+                        }
+
+                        distance = diff/mWindowWidth;
+
+                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
+                                + " distance = " + distance);
+
+
                         if (mRender != null) {
-                            mRender.setDiff(distance);
+                            mRender.setDiff(distance, mNextFilterId);
                         }
                         break;
                     case MotionEvent.ACTION_UP:
+                        if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
+                            return false;
+                        }
                         lastDiff = diff;
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                if (Math.abs(diff) > 720 * 0.7) {
-                                    if (diff > 0 && distance <= 1) {
+                                if (Math.abs(diff) > mWindowWidth * 0.7) {
+                                    if (diff > 0 && distance < 1) {
                                         distance = distance + 0.05f;
-                                        mRender.setDiff(distance);
+                                        if (distance > 1) {
+                                            distance = 1;
+                                        }
+                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
+                                                + " distance = " + distance);
+                                        mRender.setDiff(distance, mNextFilterId);
                                         handler.postDelayed(this, 50);
                                     } else if (diff <= 0 && distance > -1) {
                                         distance = distance - 0.05f;
-                                        mRender.setDiff(distance);
-                                        handler.postDelayed(this, 50);
-                                    } else {
-                                        lastDiff = diff > 0 ? -720 : 720;
-                                    }
-                                } else if (Math.abs(diff) < 720 * 0.3) {
-                                    if (diff > 0 && distance > 0) {
-                                        distance = distance - 0.05f;
-                                        mRender.setDiff(distance);
-                                        handler.postDelayed(this, 50);
-                                    } else if (diff <= 0 && distance < 0) {
-                                        distance = distance + 0.05f;
-                                        mRender.setDiff(distance);
+                                        if (distance < -1) {
+                                            distance = -1;
+                                        }
+                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
+                                                + " distance = " + distance);
+                                        mRender.setDiff(distance, mNextFilterId);
                                         handler.postDelayed(this, 50);
                                     } else {
                                         lastDiff = 0;
+                                        mCurrentFilterId = mNextFilterId;
+                                    }
+                                } else if (Math.abs(diff) < mWindowWidth * 0.3) {
+                                    if (diff > 0 && distance > 0) {
+                                        distance = distance - 0.05f;
+                                        if (distance < 0) {
+                                            distance = 0;
+                                        }
+                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
+                                                + " distance = " + distance);
+                                        mRender.setDiff(distance, mNextFilterId);
+                                        handler.postDelayed(this, 50);
+                                    } else if (diff <= 0 && distance < 0) {
+                                        distance = distance + 0.05f;
+                                        if (distance > 1) {
+                                            distance = 1;
+                                        }
+                                        Log.d("aaa" , "diff = " + diff + " mNextFilterId = " + mNextFilterId
+                                                + " distance = " + distance);
+                                        mRender.setDiff(distance, mNextFilterId);
+                                        handler.postDelayed(this, 50);
+                                    } else {
+                                        lastDiff = 0;
+                                        mCurrentFilterId = mNextFilterId;
                                     }
                                 }
                             }

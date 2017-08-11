@@ -16,12 +16,10 @@
 
 package com.myopengl.zcweicheng.gles;
 
-import android.content.res.AssetManager;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import com.myopengl.zcweicheng.MyApp;
 import com.myopengl.zcweicheng.Utils.AssetsUtils;
 
 import java.nio.FloatBuffer;
@@ -131,13 +129,15 @@ public class Texture2dProgram {
 
     private int mTextureTarget;
 
-    private final int muDistance;
+    private final int muDistanceLoc;
+    private final int mFilterIdLoc;
 
     private float[] mKernel = new float[KERNEL_SIZE];
     private float[] mTexOffset;
     private float mColorAdjust;
 
     private float distance;
+    private float filterId;
 
     /**
      * Prepares the program in the current EGL context.
@@ -185,7 +185,8 @@ public class Texture2dProgram {
         muTexMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle, "uTexMatrix");
         GlUtil.checkLocation(muTexMatrixLoc, "uTexMatrix");
         muKernelLoc = GLES20.glGetUniformLocation(mProgramHandle, "uKernel");
-        muDistance = GLES20.glGetUniformLocation(mProgramHandle, "distance");
+        muDistanceLoc = GLES20.glGetUniformLocation(mProgramHandle, "distance");
+        mFilterIdLoc = GLES20.glGetUniformLocation(mProgramHandle, "currentFilter");
         if (muKernelLoc < 0) {
             // no kernel in this one
             muKernelLoc = -1;
@@ -281,8 +282,13 @@ public class Texture2dProgram {
         //Log.d(TAG, "filt size: " + width + "x" + height + ": " + Arrays.toString(mTexOffset));
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(float distance, float filterId) {
         this.distance = distance;
+        this.filterId = filterId;
+    }
+
+    public void setFilterId(float filterId) {
+        this.filterId = filterId;
     }
 
     /**
@@ -346,9 +352,13 @@ public class Texture2dProgram {
             GLES20.glUniform2fv(muTexOffsetLoc, KERNEL_SIZE, mTexOffset, 0);
             GLES20.glUniform1f(muColorAdjustLoc, mColorAdjust);
         }
-        if (muDistance >= 0) {
-            GLES20.glUniform1f(muDistance, distance);
+        if (muDistanceLoc >= 0) {
+            GLES20.glUniform1f(muDistanceLoc, distance);
         }
+        if (mFilterIdLoc >= 0) {
+            GLES20.glUniform1f(mFilterIdLoc, filterId);
+        }
+
         // Draw the rect.
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, firstVertex, vertexCount);
         GlUtil.checkGlError("glDrawArrays");

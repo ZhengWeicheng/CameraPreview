@@ -24,6 +24,7 @@ public class FullFrameRect {
     private final Drawable2d mRectDrawable = new Drawable2d(Drawable2d.Prefab.FULL_RECTANGLE);
     private Texture2dProgram mProgram;
     private float distance;
+    private float filterId;
 
     /**
      * Prepares the object.
@@ -90,7 +91,8 @@ public class FullFrameRect {
 
     public void drawFrame(int textureId, float[] verMatrix, float[] texMatrix) {
         // Use the identity matrix for MVP so our 2x2 FULL_RECTANGLE covers the viewport.
-        mProgram.setDistance(distance);
+        mProgram.setDistance(distance, filterId);
+//        mProgram.setFilterId(filterId);
         mProgram.draw(verMatrix, mRectDrawable.getVertexArray(), 0,
                 mRectDrawable.getVertexCount(), mRectDrawable.getCoordsPerVertex(),
                 mRectDrawable.getVertexStride(),
@@ -98,7 +100,12 @@ public class FullFrameRect {
                 mRectDrawable.getTexCoordStride());
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(float distance, float filterId) {
         this.distance = distance;
+        this.filterId = filterId;
+    }
+
+    public void setFilterId(float filterId) {
+        this.filterId = filterId;
     }
 }

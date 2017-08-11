@@ -23,12 +23,14 @@ import com.myopengl.zcweicheng.manager.CameraManager;
 
 public class CameraTextureThread extends HandlerThread implements Handler.Callback, SurfaceTexture.OnFrameAvailableListener {
 
+    private static final String TAG = "RenderThread";
+
     public static final int MSG_INIT = 1;
     public static final int MSG_RELEASE = 2;
     public static final int MSG_SET_SCALE = 3;
     public static final int MSG_SET_CAMERA_SIZE = 4;
     public static final int MSG_SET_DISTANCE = 5;
-    private static final String TAG = "RenderThread";
+    public static final int MSG_SET_FILTER_ID = 6;
 
     private Handler mHandler;
     private Surface mOutputSurface;
@@ -55,6 +57,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private int mCameraSurfaceWith;
     private int mCameraSurfaceHeight;
     private float mDistance;
+    private float mFilterId;
 
     public CameraTextureThread() {
         super("VideoTextureRenderThread");
@@ -85,7 +88,12 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
                 mCameraSurfaceHeight = (int)objects[1];
                 return true;
             case MSG_SET_DISTANCE:
-                mDistance = (float) msg.obj;
+                Object[] objects1 = (Object[]) msg.obj;
+                mDistance = (float) objects1[0];
+                mFilterId = (float) objects1[1];
+                return true;
+            case MSG_SET_FILTER_ID:
+                mFilterId = (float) msg.obj;
                 return true;
         }
         return false;
@@ -147,7 +155,8 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         if (isScale) {
             Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
         }
-        mFullFrameBlit.setDistance(mDistance);
+        mFullFrameBlit.setDistance(mDistance, mFilterId);
+
         mFullFrameBlit.drawFrame(mTextureId, mverMatrix, mTmpMatrix);
         mDisplaySurface.swapBuffers();
 

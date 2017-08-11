@@ -9,6 +9,7 @@ import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_INIT;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_RELEASE;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_CAMERA_SIZE;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_DISTANCE;
+import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_FILTER_ID;
 import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_SCALE;
 
 
@@ -38,10 +39,17 @@ public class CameraTextureRender {
                 new Object[] {width, height}).sendToTarget();
     }
 
-    public void setDiff(float distance) {
+    public void setDiff(float distance, float filterId) {
         Message.obtain(mCameraTextureThread.getHandler(), MSG_SET_DISTANCE,
-                distance).sendToTarget();
+                new Object[] {distance, filterId}).sendToTarget();
     }
+
+    public void setFilterId(float filterId) {
+        Message.obtain(mCameraTextureThread.getHandler(), MSG_SET_FILTER_ID,
+                filterId).sendToTarget();
+    }
+
+
 
     public interface CameraTextureRenderListener {
         void onInputTextureCreate(SurfaceTexture surfaceTexture, int width, int height);
