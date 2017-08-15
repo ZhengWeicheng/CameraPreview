@@ -26,6 +26,7 @@
 
         <activity android:name=".ui.PlayVideoActivity"/>
         <activity android:name=".ui.CameraPreviewActivity"/>
+        <activity android:name=".ui.CameraDataPreviewActivity"/>
     </application>
 
 </manifest>

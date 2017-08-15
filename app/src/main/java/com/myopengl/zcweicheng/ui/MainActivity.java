@@ -38,6 +38,14 @@ public class MainActivity extends Activity {
             }
         });
 
+        Button button3 = (Button) findViewById(R.id.camera_preview_data);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CameraDataPreviewActivity.class));
+            }
+        });
+
 
     }
 

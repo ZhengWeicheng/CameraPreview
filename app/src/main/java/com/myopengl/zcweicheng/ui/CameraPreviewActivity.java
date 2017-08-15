@@ -15,6 +15,7 @@ import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
 import com.myopengl.zcweicheng.render.CameraTextureRender;
 import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
+import com.myopengl.zcweicheng.ui.TextureTouchListener.onUpdateListener;
 
 import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE;
 
@@ -26,124 +27,23 @@ import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE
 public class CameraPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
 
     private CameraTextureRender mRender;
-    private float startX, diff, distance;
-    Handler handler;
-    private int mWindowWidth;
-    private int mCurrentFilterId = 0, mNextFilterId = 0;
+    private TextureView textureView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_preview);
 
-        final TextureView textureView = (TextureView) findViewById(R.id.preview_texture);
+        textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
-        handler = new Handler();
-        mWindowWidth = getResources().getDisplayMetrics().widthPixels;
-        textureView.setOnTouchListener(new View.OnTouchListener() {
+        textureView.setOnTouchListener(new TextureTouchListener(new onUpdateListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        diff = event.getX() - startX;
-                        if ((diff < 0 && mCurrentFilterId == 4) || (diff > 0 && mCurrentFilterId == 0)) {
-                            return false;
-                        }
-                        if ((diff > 0 && mCurrentFilterId == 5)) {
-                            mNextFilterId = 4;
-                        } else if ((diff < 0 && mCurrentFilterId == 0)) {
-                            mNextFilterId = 1;
-                        } else {
-                            mNextFilterId = diff > 0 ? mCurrentFilterId - 1 : mCurrentFilterId + 1;
-                            if (mNextFilterId > 5) {
-                                mNextFilterId = 5;
-                            } else if (mNextFilterId < 0) {
-                                mNextFilterId = 0;
-                            }
-                        }
-                        if (diff > 0) {
-//                            diff = mWindowWidth - diff;
-                            distance = (mWindowWidth - diff)/mWindowWidth;
-                        } else {
-                            distance = diff/mWindowWidth;
-                        }
-
-//                        Log.d("aaa", " diff = " + diff + " distance = "
-//                                + distance + " mNextFilterId = " + mNextFilterId);
-
-                        if (mRender != null) {
-                            mRender.setDiff(distance, mNextFilterId);
-                        }
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
-                            return false;
-                        }
-                        textureView.setEnabled(false);
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (Math.abs(diff) > mWindowWidth * 0.2) {
-                                    if (diff > 0 && distance > 0) {
-                                        distance = distance - 0.05f;
-                                        if (distance < 0) {
-                                            distance = 0;
-                                        }
-//                                        Log.d("aaa1", " diff = " + diff + " distance = "
-//                                                + distance + " mNextFilterId = " + mNextFilterId);
-                                        mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 10);
-                                    } else if (diff <= 0 && distance > -1) {
-                                        distance = distance - 0.05f;
-                                        if (distance < -1) {
-                                            distance = -1;
-                                        }
-//                                        Log.d("aaa2", " diff = " + diff + " distance = "
-//                                                + distance + " mNextFilterId = " + mNextFilterId);
-                                        mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 10);
-                                    } else {
-                                        mCurrentFilterId = mNextFilterId;
-                                        textureView.setEnabled(true);
-                                    }
-                                } else  {
-//                                    mNextFilterId = mCurrentFilterId;
-                                    if (diff > 0 && distance < 1) {
-                                        distance = distance + 0.05f;
-                                        if (distance > 1) {
-                                            distance = 1;
-                                        }
-//                                        Log.d("aaa3", " diff = " + diff + " distance = "
-//                                                + distance + " mNextFilterId = " + mNextFilterId);
-                                        mRender.setDiff(distance, mNextFilterId);
-                                        handler.postDelayed(this, 10);
-                                    } else if (diff <= 0 && distance < 0) {
-                                        distance = distance + 0.02f;
-                                        if (distance >= 0) {
-                                            distance = 0;
-                                            mRender.setDiff(distance, mCurrentFilterId);
-                                        } else {
-//                                            Log.d("aaa4", " diff = " + diff + " distance = "
-//                                                    + distance + " mNextFilterId = " + mNextFilterId);
-                                            mRender.setDiff(distance, mNextFilterId);
-                                        }
-                                        handler.postDelayed(this, 10);
-                                    } else {
-//                                        mCurrentFilterId = mNextFilterId;
-                                        mNextFilterId = mCurrentFilterId;
-                                        textureView.setEnabled(true);
-                                    }
-                                }
-                            }
-                        }, 10);
-                        break;
+            public void onUpdate(float distance, int filterId) {
+                if (mRender != null) {
+                    mRender.setDiff(distance, filterId);
                 }
-                return true;
             }
-        });
+        }));
     }
 
     @Override
@@ -177,7 +77,6 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         CameraManager.getInstance().stopCamera();
-        handler.removeCallbacksAndMessages(null);
         if (mRender != null) {
             mRender.release();
         }

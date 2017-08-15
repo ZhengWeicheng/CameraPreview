@@ -35,6 +35,13 @@
         android:textSize="12sp"
         android:text="Preview Camera"/>
 
+    <Button
+        android:id="@+id/camera_preview_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="Preview Camera data"/>
+
     <!--<ListView-->
         <!--android:id="@android:id/list"-->
         <!--android:layout_width="match_parent"-->

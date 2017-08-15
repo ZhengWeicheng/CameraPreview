@@ -189,10 +189,10 @@ public class CameraManager {
                 } else {
                     Log.e(TAG, "WTF,不能设置帧率");
                 }
-////                    优化
-//                    if (!android.os.Build.MODEL.equals("GT-I9100")){
-//                        params.setRecordingHint(true);
-//                    }
+//              优化
+                if (!android.os.Build.MODEL.equals("GT-I9100")){
+                    params.setRecordingHint(true);
+                }
                 //聚焦
                 List<String> focusModes = params.getSupportedFocusModes();
                 if (focusModes != null) {
