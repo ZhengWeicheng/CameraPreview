@@ -1,5 +1,5 @@
-#include "render.h"
-#include "GLUtil.h"
+#include "DataRender.h"
+#include "../GLUtil.h"
 #include <android/native_window_jni.h>
 #include <sstream>
 #include <android/asset_manager_jni.h>
@@ -295,7 +295,11 @@ void releaseGLContext(GLContextHolder *engineHolder) {
         }
         eglDestroySurface(engineHolder->eglDisplay, engineHolder->eglSurface);
         eglDestroyContext(engineHolder->eglDisplay, engineHolder->eglContext);
+        eglReleaseThread();
+        eglTerminate(engineHolder->eglDisplay);
+        delete(engineHolder->inputTextureCorrd);
         delete (engineHolder);
+        engineHolder = NULL;
     }
 
 }

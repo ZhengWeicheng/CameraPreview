@@ -46,6 +46,14 @@ public class MainActivity extends Activity {
             }
         });
 
+        Button button4 = (Button) findViewById(R.id.test_animator);
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, TestAnimatorDrawableActivity.class));
+            }
+        });
+
 
     }
 

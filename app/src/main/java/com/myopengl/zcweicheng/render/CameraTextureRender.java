@@ -18,6 +18,9 @@ import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_SCALE;
  */
 
 public class CameraTextureRender {
+    static {
+        System.loadLibrary("native-lib");
+    }
     private CameraTextureThread mCameraTextureThread;
 
     public CameraTextureRender(Surface outSurface, int width, int height, @NonNull CameraTextureRenderListener listener) {

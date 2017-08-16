@@ -14,6 +14,7 @@ import com.myopengl.zcweicheng.ui.TextureTouchListener.onUpdateListener;
 
 /**
  * Created by zhengweicheng on 2017/8/14 0014.
+ *
  */
 
 public class CameraDataPreviewActivity extends Activity implements TextureView.SurfaceTextureListener {
@@ -95,7 +96,8 @@ public class CameraDataPreviewActivity extends Activity implements TextureView.S
                 });
         CameraManager.getInstance().setDataCallback(new CameraManager.DataCallback() {
             @Override
-            public void callback(byte[] data, int mWidth, int mHeight, int mCameraOrientation, int mCameraIndex) {
+            public void callback(byte[] data, int mWidth, int mHeight, int mCameraOrientation,
+                                 int mCameraIndex) {
                 if (mRender != null) {
                     mRender.process(data, mWidth ,mHeight, mCameraOrientation,
                             mCameraIndex == Camera.CameraInfo.CAMERA_FACING_FRONT, 0);

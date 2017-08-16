@@ -11,6 +11,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Surface;
 
+import com.myopengl.zcweicheng.Utils.AssetsUtils;
 import com.myopengl.zcweicheng.gles.EglCore;
 import com.myopengl.zcweicheng.gles.FullFrameRect;
 import com.myopengl.zcweicheng.gles.Texture2dProgram;
@@ -25,20 +26,17 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 
     private static final String TAG = "RenderThread";
 
-    public static final int MSG_INIT = 1;
-    public static final int MSG_RELEASE = 2;
-    public static final int MSG_SET_SCALE = 3;
-    public static final int MSG_SET_CAMERA_SIZE = 4;
-    public static final int MSG_SET_DISTANCE = 5;
-    public static final int MSG_SET_FILTER_ID = 6;
+    static final int MSG_INIT = 1;
+    static final int MSG_RELEASE = 2;
+    static final int MSG_SET_SCALE = 3;
+    static final int MSG_SET_CAMERA_SIZE = 4;
+    static final int MSG_SET_DISTANCE = 5;
+    static final int MSG_SET_FILTER_ID = 6;
 
     private Handler mHandler;
     private Surface mOutputSurface;
     private int mWidth;
     private int mHeight;
-    private EglCore mEglCore;
-    private WindowSurface mDisplaySurface;
-    private FullFrameRect mFullFrameBlit;
     private int mTextureId;
     private SurfaceTexture mInputTexture;
     private final float[] mTmpMatrix = new float[16];
@@ -51,13 +49,13 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     static {
         mverMatrix = new float[16];
         Matrix.setIdentityM(mverMatrix, 0);
-        Matrix.rotateM(mverMatrix, 0, 180, 0.0f, 0.0f, 1.0f);
     }
 
     private int mCameraSurfaceWith;
     private int mCameraSurfaceHeight;
     private float mDistance;
     private float mFilterId;
+    private long enginId;
 
     public CameraTextureThread() {
         super("VideoTextureRenderThread");
@@ -105,13 +103,17 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mWidth = (int) objects[1];
         mHeight = (int) objects[2];
         mCameraIndex = CameraManager.getInstance().getCameraIndex();
+        String vertex = AssetsUtils.getFromAssets("vertex.glsl");
+        String fragment = AssetsUtils.getFromAssets("slide_fragment.glsl");
+
+        enginId = nativeInit(mOutputSurface, vertex, fragment);
+        if (enginId == 0) {
+            Log.d("aaaaaaa","初始化出错啦");
+            return;
+        }
         mListener = (CameraTextureRender.CameraTextureRenderListener) objects[3];
-        mEglCore = new EglCore(null, EglCore.FLAG_RECORDABLE);
-        mDisplaySurface = new WindowSurface(mEglCore, mOutputSurface, true);
-        mDisplaySurface.makeCurrent();
-        mFullFrameBlit = new FullFrameRect(
-                new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_EXT));
-        mTextureId = mFullFrameBlit.createTextureObject();
+
+        mTextureId = nativeGetInputTex(enginId);
         mInputTexture = new SurfaceTexture(mTextureId);
         mInputTexture.setOnFrameAvailableListener(this);
         mListener.onInputTextureCreate(mInputTexture, mWidth, mHeight);
@@ -124,43 +126,34 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             mInputTexture.release();
             mInputTexture = null;
         }
-        if (mDisplaySurface != null) {
-            mDisplaySurface.release();
-            mDisplaySurface = null;
-        }
-        if (mFullFrameBlit != null) {
-            mFullFrameBlit.release(false);
-            mFullFrameBlit = null;
-        }
-        if (mEglCore != null) {
-            mEglCore.release();
-            mEglCore = null;
-        }
+        nativeRelease(enginId);
         Log.d(TAG, "release");
     }
 
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//        Log.d(TAG, "onFrameAvailable mWidth " + mWidth + " mHeight = " + mHeight);
-        if (mEglCore == null) {
+        if (enginId == 0 || mInputTexture == null) {
             Log.d(TAG, "Skipping drawFrame after shutdown");
             return;
         }
         // Latch the next frame from the camera.
-        mDisplaySurface.makeCurrent();
-        mInputTexture.updateTexImage();
         mInputTexture.getTransformMatrix(mTmpMatrix);
-        GLES20.glViewport(0, 0, mWidth, mHeight);
         if (isScale) {
             Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
         }
-        mFullFrameBlit.setDistance(mDistance, mFilterId);
-
-        mFullFrameBlit.drawFrame(mTextureId, mverMatrix, mTmpMatrix);
-        mDisplaySurface.swapBuffers();
-
+        nativeDraw(surfaceTexture, mverMatrix, mTmpMatrix, mDistance, mFilterId, enginId);
         mFrameNum++;
     }
+
+    private static native long nativeInit(Surface surface, String vertex, String fragment);
+    private static native void nativeRelease(long holder);
+    private static native void nativeDraw(SurfaceTexture surface, float[] mverMatrix, float[] mTmpMatrix,
+                                          float distance, float nextFilterId, long holder);
+
+    private static native int nativeGetInputTex(long engine);
+
+    private static native long nativeGetEglContext(long engine);
+
 }
 

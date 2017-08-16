@@ -1,8 +1,5 @@
 package com.myopengl.zcweicheng.ui;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
@@ -127,22 +124,6 @@ public class TextureTouchListener implements View.OnTouchListener {
     private void setDiff(float distance, int nextFilterId) {
         if (mListener != null) {
             mListener.onUpdate(distance, nextFilterId);
-        }
-    }
-
-    private static class UpdateHandler extends HandlerThread implements Handler.Callback {
-
-        private Handler mHandler;
-
-        public UpdateHandler() {
-            super("UpdateHandler");
-            start();
-            mHandler = new Handler(getLooper(), this);
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            return false;
         }
     }
 }

@@ -19,7 +19,9 @@ add_library( # Sets the name of the library.
              # Associated headers in the same location as their source
              # file are automatically included.
              src/main/cpp/GLUtil.cpp
-             src/main/cpp/render.cpp)
+             src/main/cpp/JNIUtils.cpp
+             src/main/cpp/render/DataRender.cpp
+             src/main/cpp/render/TextureRender.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by
