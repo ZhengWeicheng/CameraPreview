@@ -3,19 +3,15 @@ package com.myopengl.zcweicheng.ui;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 
 import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
 import com.myopengl.zcweicheng.render.CameraTextureRender;
 import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
-import com.myopengl.zcweicheng.ui.TextureTouchListener.onUpdateListener;
+import com.myopengl.zcweicheng.ui.TextureTouchListener.onTextureTouchListener;
 
 import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE;
 
@@ -36,7 +32,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
 
         textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
-        textureView.setOnTouchListener(new TextureTouchListener(new onUpdateListener() {
+        textureView.setOnTouchListener(new TextureTouchListener(new onTextureTouchListener() {
             @Override
             public void onUpdate(float distance, int filterId) {
                 if (mRender != null) {

@@ -100,9 +100,6 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private void init(Message msg) {
         Object[] objects = (Object[]) msg.obj;
         mOutputSurface = (Surface) objects[0];
-        mWidth = (int) objects[1];
-        mHeight = (int) objects[2];
-        mCameraIndex = CameraManager.getInstance().getCameraIndex();
         String vertex = AssetsUtils.getFromAssets("vertex.glsl");
         String fragment = AssetsUtils.getFromAssets("slide_fragment.glsl");
 
@@ -111,12 +108,27 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             Log.d("aaaaaaa","初始化出错啦");
             return;
         }
-        mListener = (CameraTextureRender.CameraTextureRenderListener) objects[3];
 
         mTextureId = nativeGetInputTex(enginId);
         mInputTexture = new SurfaceTexture(mTextureId);
         mInputTexture.setOnFrameAvailableListener(this);
+        mWidth = (int) objects[1];
+        mHeight = (int) objects[2];
+        mListener = (CameraTextureRender.CameraTextureRenderListener) objects[3];
+
+        mCameraIndex = CameraManager.getInstance().getCameraIndex();
+
+        rotateCameraMatrix();
+
         mListener.onInputTextureCreate(mInputTexture, mWidth, mHeight);
+    }
+
+    public void rotateCameraMatrix() {
+        if (mCameraIndex == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            Matrix.rotateM(mverMatrix, 0, 180, 0.f, 0.f, 1.f);
+        } else {
+            Matrix.rotateM(mverMatrix, 0, 0, 0.f, 0.f, 1.f);
+        }
     }
 
     private void release() {

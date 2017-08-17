@@ -35,6 +35,7 @@ public class CameraManager {
     private static final String TAG = "CameraManager";
     private static final int MSG_INIT = 1;
     private static final int MSG_STOP = 2;
+    private static final int MSG_TOGGLE = 3;
 
     public static final int ERROR_PERMISSION_DENY = 1;
     public static final int ERROR_CAMERA_INITIALIZED = 2;
@@ -78,6 +79,12 @@ public class CameraManager {
         Message.obtain(mCameraThread.mHandler, MSG_STOP).sendToTarget();
     }
 
+    public void toggleCamera(CameraOperateListener listener) {
+        mCameraThread.exited = true;
+        mCameraThread.mDataCallback = null;
+        Message.obtain(mCameraThread.mHandler,MSG_STOP, listener).sendToTarget();
+    }
+
     public void setDataCallback(DataCallback dataCallback) {
         mCameraThread.mDataCallback = dataCallback;
     }
@@ -106,7 +113,7 @@ public class CameraManager {
         public CameraThread() {
             super("camera thread");
             start();
-            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
             mHandler = new Handler(Looper.myLooper(), this);
         }
 
@@ -121,8 +128,23 @@ public class CameraManager {
                     release();
                     releaseObject();
                     return true;
+                case MSG_TOGGLE:
+                    toggleCameraInternal(msg);
             }
             return false;
+        }
+
+        private void toggleCameraInternal(Message msg) {
+            Log.w(TAG, "toggleCamera");
+            release();
+            if (mCameraIndex == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+            } else {
+                mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            }
+            CameraOperateListener listener = (CameraOperateListener) msg.obj;
+            msg.obj =  new Object[] {mWidth, mHeight, mPreviewMode, mSurfaceTexture, listener};
+            initCamera(msg);
         }
 
         private void initCamera(Message msg) {
@@ -469,6 +491,14 @@ public class CameraManager {
          * @param height 相机预览的高度
          */
         void onSuccess(SurfaceTexture surfaceTexture, int width, int height);
+    }
+
+    public interface CameraOperateListener {
+        /**
+         * 切换相机
+         * @param state 切换相机后的状态
+         */
+        void onToggleComplete(int state);
     }
 
     /**

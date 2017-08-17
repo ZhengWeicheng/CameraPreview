@@ -10,7 +10,7 @@ import android.view.TextureView;
 import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.render.Renderer;
-import com.myopengl.zcweicheng.ui.TextureTouchListener.onUpdateListener;
+import com.myopengl.zcweicheng.ui.TextureTouchListener.onTextureTouchListener;
 
 /**
  * Created by zhengweicheng on 2017/8/14 0014.
@@ -31,7 +31,7 @@ public class CameraDataPreviewActivity extends Activity implements TextureView.S
 
         mPreviewTexture.setSurfaceTextureListener(this);
 
-        mPreviewTexture.setOnTouchListener(new TextureTouchListener(new onUpdateListener() {
+        mPreviewTexture.setOnTouchListener(new TextureTouchListener(new onTextureTouchListener() {
             @Override
             public void onUpdate(float distance, int filterId) {
                 if (mRender != null) {

@@ -52,7 +52,9 @@ public class CameraTextureRender {
                 filterId).sendToTarget();
     }
 
-
+    public void rotateCameraMatrix() {
+        mCameraTextureThread.rotateCameraMatrix();
+    }
 
     public interface CameraTextureRenderListener {
         void onInputTextureCreate(SurfaceTexture surfaceTexture, int width, int height);

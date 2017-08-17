@@ -13,18 +13,21 @@ import com.myopengl.zcweicheng.MyApp;
 
 public class TextureTouchListener implements View.OnTouchListener {
 
-    private onUpdateListener mListener;
+    private onTextureTouchListener mListener;
     private float startX, diff, distance;
     private int mWindowWidth;
     private int mCurrentFilterId = 0, mNextFilterId = 0;
     private UpdateHandler mUpdateHandlerThread;
     private boolean isChnagingFilter;
+    private boolean isMove;
+    private long lastClickTime;
 
-    public interface onUpdateListener {
+    public interface onTextureTouchListener {
         void onUpdate(float distance, int filterId);
+        void onDobuleClick();
     }
 
-    public TextureTouchListener(@NonNull  onUpdateListener listener) {
+    public TextureTouchListener(@NonNull onTextureTouchListener listener) {
         mListener = listener;
         mWindowWidth = MyApp.getContext().getResources().getDisplayMetrics().widthPixels;
         mUpdateHandlerThread = new UpdateHandler();
@@ -40,8 +43,11 @@ public class TextureTouchListener implements View.OnTouchListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 startX = event.getX();
+                isMove = false;
+                lastClickTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
+                isMove = true;
                 diff = event.getX() - startX;
                 if ((diff < 0 && mCurrentFilterId == 4) || (diff > 0 && mCurrentFilterId == 0)) {
                     return false;
@@ -66,6 +72,10 @@ public class TextureTouchListener implements View.OnTouchListener {
                 setDiff(distance, mNextFilterId);
                 break;
             case MotionEvent.ACTION_UP:
+//                if (!isMove && System.currentTimeMillis() - lastClickTime < 300 && mListener != null) {
+//                    mListener.onDobuleClick();
+//                }
+                isMove = false;
                 if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
                     return false;
                 }
@@ -91,6 +101,7 @@ public class TextureTouchListener implements View.OnTouchListener {
                             } else {
                                 mCurrentFilterId = mNextFilterId;
                                 isChnagingFilter = false;
+                                diff = 0;
                             }
                         } else  {
                             if (diff > 0 && distance < 1) {
@@ -112,6 +123,7 @@ public class TextureTouchListener implements View.OnTouchListener {
                             } else {
                                 mNextFilterId = mCurrentFilterId;
                                 isChnagingFilter = false;
+                                diff = 0;
                             }
                         }
                     }
