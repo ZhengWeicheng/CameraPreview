@@ -13,17 +13,12 @@ public:
     TextureRenderHolder() {
         RenderHolder();
         textures = NULL;
-        inputTextureCorrd = NULL;
     }
 
     ~TextureRenderHolder() {
         if (textures != NULL) {
             glDeleteTextures(textureNums, textures);
         }
-        if (inputTextureCorrd != NULL) {
-            delete inputTextureCorrd;
-        }
-
     }
 public:
     GLuint posAttrVertices;
@@ -41,10 +36,6 @@ public:
     GLuint posVertex;
 
     GLuint posTexMat;
-
-
-
-    const float *inputTextureCorrd;
 
     jmethodID updatImageMethodId;
 };

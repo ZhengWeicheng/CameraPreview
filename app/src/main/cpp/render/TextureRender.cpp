@@ -40,17 +40,8 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     //tex
-    GLuint *textures = new GLuint[1];
-    glGenTextures(1, textures);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+    holder->textures = createExternalOESTexture();
     holder->textureNums = 1;
-    holder->textures = textures;
-
 
     glDepthMask(GL_FALSE);
     glDisable(GL_BLEND);

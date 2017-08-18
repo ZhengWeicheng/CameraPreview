@@ -4,8 +4,11 @@
 #include "RenderHolder.h"
 #include <stdlib.h>
 #include <android/native_window_jni.h>
+#include <GLES2/gl2ext.h>
 
 #define LOG_TAG "GLUtil"
+
+#define GET_ARRAY_LEN(array, len){len = (sizeof(array) / sizeof(array[0]));}
 
 void checkGlError(const char *op) {
     for (GLint error = glGetError(); error; error = glGetError()) {
@@ -124,7 +127,7 @@ void createRenderHolder(JNIEnv *env, jobject jSurface,
     }
     EGLint attrib_list[] =
             {
-                    EGL_CONTEXT_CLIENT_VERSION, 2,
+                    EGL_CONTEXT_CLIENT_VERSION, 3,
                     EGL_NONE
             };
     holder->eglContext = eglCreateContext(holder->eglDisplay, config, EGL_NO_CONTEXT, attrib_list);
@@ -153,6 +156,17 @@ void createRenderHolder(JNIEnv *env, jobject jSurface,
         delete (&holder);
         return;
     }
+}
+
+GLuint* createExternalOESTexture() {
+    GLuint *textures = new GLuint[1];
+    glGenTextures(1, textures);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    return textures;
 }
 
 float d2r(float d) {
