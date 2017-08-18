@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:name=".MyApp"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,10 +24,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.PlayVideoActivity"/>
-        <activity android:name=".ui.CameraPreviewActivity"/>
-        <activity android:name=".ui.CameraDataPreviewActivity"/>
-        <activity android:name=".ui.TestAnimatorDrawableActivity"/>
+        <activity android:name=".ui.activity.PlayVideoActivity"/>
+        <activity android:name=".ui.activity.CameraPreviewActivity"/>
+        <activity android:name=".ui.activity.CameraGlSurfacePreviewActivity"/>
+        <activity android:name=".ui.activity.CameraDataPreviewActivity"/>
+        <activity android:name=".ui.activity.TestAnimatorDrawableActivity"/>
     </application>
 
 </manifest>

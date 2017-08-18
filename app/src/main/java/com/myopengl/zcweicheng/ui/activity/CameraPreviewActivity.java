@@ -1,4 +1,4 @@
-package com.myopengl.zcweicheng.ui;
+package com.myopengl.zcweicheng.ui.activity;
 
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
@@ -11,6 +11,7 @@ import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
 import com.myopengl.zcweicheng.render.CameraTextureRender;
 import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
+import com.myopengl.zcweicheng.ui.TextureTouchListener;
 import com.myopengl.zcweicheng.ui.TextureTouchListener.onTextureTouchListener;
 
 import static com.myopengl.zcweicheng.manager.CameraManager.MODE_PREVIEW_TEXTURE;
@@ -38,6 +39,11 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                 if (mRender != null) {
                     mRender.setDiff(distance, filterId);
                 }
+            }
+
+            @Override
+            public void onDobuleClick() {
+
             }
         }));
     }

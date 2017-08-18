@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.MainActivity" >
+    tools:context=".ui.activity.MainActivity" >
 
     <Button
         android:id="@+id/play_video"
@@ -48,6 +48,13 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:text="Test Animator"/>
+
+    <Button
+        android:id="@+id/gl_surface_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="GL Surface Preview"/>
 
     <!--<ListView-->
         <!--android:id="@android:id/list"-->

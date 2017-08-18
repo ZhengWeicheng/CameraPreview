@@ -64,7 +64,7 @@ public class CameraManager {
 
     public void startCamera(Activity activity, int expectWidth, int expectHeight, int mode,
                             SurfaceTexture outputTexture, @NonNull CameraStateListener listener) {
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
+        if (activity != null && ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             listener.onError(ERROR_PERMISSION_DENY);
             return;
@@ -322,10 +322,10 @@ public class CameraManager {
                     mVideoBuffer[1] = null;
                     mVideoBuffer = null;
                 }
-                if (mSurfaceTexture != null) {
-                    mSurfaceTexture.release();
-                    mSurfaceTexture = null;
-                }
+//                if (mSurfaceTexture != null) {
+//                    mSurfaceTexture.release();
+//                    mSurfaceTexture = null;
+//                }
             }
         }
 

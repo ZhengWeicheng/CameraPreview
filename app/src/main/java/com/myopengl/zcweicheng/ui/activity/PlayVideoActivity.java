@@ -1,4 +1,4 @@
-package com.myopengl.zcweicheng.ui;
+package com.myopengl.zcweicheng.ui.activity;
 
 import android.app.Activity;
 import android.graphics.Matrix;

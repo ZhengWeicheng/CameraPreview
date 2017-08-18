@@ -1,4 +1,4 @@
-package com.myopengl.zcweicheng.ui;
+package com.myopengl.zcweicheng.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -51,6 +51,14 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, TestAnimatorDrawableActivity.class));
+            }
+        });
+
+        Button button5 = (Button) findViewById(R.id.gl_surface_preview);
+        button5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CameraGlSurfacePreviewActivity.class));
             }
         });
 
