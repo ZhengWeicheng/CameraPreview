@@ -16,25 +16,26 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
 
     createRenderHolder(env, surface, vertex_, fragment_, (RenderHolder*)holder);
     if (holder->eglDisplay == EGL_NO_DISPLAY || holder->eglSurface == EGL_NO_SURFACE
-        ||holder->eglContext == EGL_NO_CONTEXT || holder->currentProgram == 0) {
+        ||holder->eglContext == EGL_NO_CONTEXT) {
         delete holder;
         return 0;
     }
-    holder->posAttrVertices = (GLuint) glGetAttribLocation(holder->currentProgram, "aPosition");
 
-    holder->posAttrTexCoords = (GLuint) glGetAttribLocation(holder->currentProgram, "aTextureCoord");
+    //context create success,now create program
+    const char *vertex = env->GetStringUTFChars(vertex_, 0);
+    const char *fragment = env->GetStringUTFChars(fragment_, 0);
 
-    holder->posVertex = (GLuint) glGetUniformLocation(holder->currentProgram, "uMVPMatrix");
+    holder->mCameraFilter->create(vertex, fragment);
 
-    holder->posTexMat = (GLuint) glGetUniformLocation(holder->currentProgram, "uTexMatrix");
-
-    holder->posDistance = (GLuint) glGetUniformLocation(holder->currentProgram, "distance");
-
-    holder->posNextFilterId = (GLuint) glGetUniformLocation(holder->currentProgram, "currentFilter");
+    env->ReleaseStringUTFChars(vertex_, vertex);
+    env->ReleaseStringUTFChars(fragment_, fragment);
+//    delete shader;
+    if (!holder->mCameraFilter->isProgramAvailable()) {
+        delete holder;
+        return 0;
+    }
 
     holder->updatImageMethodId = getSurfaceUpdateImageMethodId(env);
-
-    glUseProgram(holder->currentProgram);
 
     // Use tightly packed data
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -84,28 +85,10 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeDraw(JNIEnv *env, 
 
     env->CallVoidMethod(surface, holder->updatImageMethodId);
 
-    //输入顶点
-    glEnableVertexAttribArray(holder->posAttrVertices);
-    glVertexAttribPointer(holder->posAttrVertices, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), VERTICES_RENDER);
+    holder->mCameraFilter->setDistanceAndNextFilter(distance, nextFilterId);
 
-    //输入纹理坐标
-    glEnableVertexAttribArray(holder->posAttrTexCoords);
-    glVertexAttribPointer(holder->posAttrTexCoords, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), TEXTURE_RENDER);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, holder->textures[0]);
-
-    glUniformMatrix4fv(holder->posVertex, 1, GL_FALSE, mverMatrix);
-
-    glUniformMatrix4fv(holder->posTexMat, 1, GL_FALSE, mTmpMatrix);
-
-    glUniform1f(holder->posDistance, distance);
-    glUniform1f(holder->posNextFilterId, nextFilterId);
-
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    glDisableVertexAttribArray(holder->posAttrVertices);
-    glDisableVertexAttribArray(holder->posAttrTexCoords);
+    holder->mCameraFilter->drawFrame(GL_TEXTURE_EXTERNAL_OES, holder->textures[0],
+            mverMatrix, mTmpMatrix);
 
     eglSwapBuffers(holder->eglDisplay, holder->eglSurface);
 

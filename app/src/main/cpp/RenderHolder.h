@@ -15,14 +15,9 @@ public:
         eglDisplay = EGL_NO_DISPLAY;
         eglSurface = EGL_NO_SURFACE;
         eglContext = EGL_NO_CONTEXT;
-        currentProgram = 0;
     }
 
     virtual ~RenderHolder() {
-        if (currentProgram <= 0) {
-            glDeleteProgram(currentProgram);
-            currentProgram = 0;
-        }
         if (eglDisplay != EGL_NO_DISPLAY) {
             eglDestroySurface(eglDisplay, eglSurface);
             eglDestroyContext(eglDisplay, eglContext);
@@ -41,7 +36,5 @@ public:
     EGLSurface eglSurface;
 
     EGLDisplay eglDisplay;
-
-    GLuint currentProgram;
 };
 #endif //MYOPENGL2_RENDERHOLDER_H

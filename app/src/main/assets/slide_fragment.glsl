@@ -29,7 +29,7 @@ vec4 getFilterColor(float filterId) {
         color = vec4(1.0-textureColor.r,1.0-textureColor.g,1.0-textureColor.b,1.0);
     } else if (filterId == 4.f) {
         float monoColor = dot(texture2D(texture, tc).rgb,monoMultiplier);
-        gl_FragColor = vec4(clamp(vec3(monoColor, monoColor, monoColor)*sepiaToneFactor, 0.0, 1.0), 1.0);
+        color = vec4(clamp(vec3(monoColor, monoColor, monoColor)*sepiaToneFactor, 0.0, 1.0), 1.0);
     } else {
         color = texture2D(texture, tc);
     }

@@ -8,7 +8,7 @@
 
 void BaseFilter::create(const char *vertex, const char *texture) {
     programId = createProgram(vertex, texture);
-    if (programId <= 0) {
+    if (programId < 0) {
         delete this;
     }
 
@@ -19,6 +19,8 @@ void BaseFilter::create(const char *vertex, const char *texture) {
     posVertex = (GLuint) glGetUniformLocation(programId, "uMVPMatrix");
 
     posTexMat = (GLuint) glGetUniformLocation(programId, "uTexMatrix");
+
+    onCreated();
 }
 
 void BaseFilter::initFrambuffer(int width, int height) {
@@ -61,10 +63,17 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMat
     if (mFrameBuffers == NULL) {
         return 0;
     }
-    glViewport(0, 0, frameWidth, frameHeight);
-    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffers[0]);
-    glUseProgram(programId);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffers[0]);
+//    glViewport(0, 0, frameWidth, frameHeight);
+    drawFrame(target, texture, mverMatrix, mTmpMatrix);
+
+    return mFrameBufferTextures[0];
+}
+
+void BaseFilter::drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix) {
+
+    glUseProgram(programId);
     //输入顶点
     glEnableVertexAttribArray(posAttrVertices);
     glVertexAttribPointer(posAttrVertices, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), VERTICES_RENDER);
@@ -79,14 +88,17 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMat
     glUniformMatrix4fv(posVertex, 1, GL_FALSE, mverMatrix);
 
     glUniformMatrix4fv(posTexMat, 1, GL_FALSE, mTmpMatrix);
+
     onDrawArraysPre();
+
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
     onDrawArraysAfter();
+
     glDisableVertexAttribArray(posAttrVertices);
     glDisableVertexAttribArray(posAttrTexCoords);
-
-    return mFrameBufferTextures[0];
 }
+
 
 void BaseFilter::onDrawArraysPre() {
 
@@ -96,6 +108,9 @@ void BaseFilter::onDrawArraysAfter() {
 
 }
 
+void BaseFilter::onCreated() {
+
+}
 
 
 

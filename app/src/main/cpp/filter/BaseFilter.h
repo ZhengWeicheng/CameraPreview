@@ -29,7 +29,14 @@ public:
         destroyFrameBuffer();
     }
 
-    void create(const char* vertex, const char* texture);
+public:
+    virtual void create(const char* vertex, const char* texture);
+
+    virtual void onDrawArraysPre();
+
+    virtual void onDrawArraysAfter();
+
+    virtual void onCreated();
 
     void initFrambuffer(int width, int height);
 
@@ -37,11 +44,9 @@ public:
 
     int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
-    void onDrawArraysPre();
+    virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
-    void onDrawArraysAfter();
-
-public:
+protected:
     GLuint programId;
     GLuint posAttrVertices;
     GLuint posAttrTexCoords;

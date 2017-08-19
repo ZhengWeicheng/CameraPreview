@@ -143,19 +143,6 @@ void createRenderHolder(JNIEnv *env, jobject jSurface,
         delete (&holder);
         return;
     }
-
-    //context create success,now create program
-    const char *vertex_ = env->GetStringUTFChars(vertex, 0);
-    const char *fragment_ = env->GetStringUTFChars(fragment, 0);
-    holder->currentProgram = createProgram(vertex_, fragment_);
-
-    env->ReleaseStringUTFChars(vertex, vertex_);
-    env->ReleaseStringUTFChars(fragment, fragment_);
-//    delete shader;
-    if (holder->currentProgram == 0) {
-        delete (&holder);
-        return;
-    }
 }
 
 GLuint* createExternalOESTexture() {

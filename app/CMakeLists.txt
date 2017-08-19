@@ -22,7 +22,9 @@ add_library( # Sets the name of the library.
              src/main/cpp/JNIUtils.cpp
              src/main/cpp/render/DataRender.cpp
              src/main/cpp/render/TextureRender.cpp
-             src/main/cpp/filter/BaseFilter.cpp)
+             src/main/cpp/filter/BaseFilter.cpp
+             src/main/cpp/filter/CameraTextureFilter.cpp
+             )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by

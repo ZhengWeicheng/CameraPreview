@@ -7,57 +7,36 @@
 
 #include <jni.h>
 #include "../RenderHolder.h"
+#include "../filter/BaseFilter.h"
+#include "../filter/CameraTextureFilter.h"
 
 class TextureRenderHolder : public RenderHolder {
 public:
     TextureRenderHolder() {
         RenderHolder();
+        mCameraFilter = new CameraTextureFilter();
         textures = NULL;
     }
 
-    ~TextureRenderHolder() {
+    virtual ~TextureRenderHolder() {
+        RenderHolder::~RenderHolder();
         if (textures != NULL) {
             glDeleteTextures(textureNums, textures);
         }
+        if (mCameraFilter != NULL) {
+            delete mCameraFilter;
+            mCameraFilter = NULL;
+        }
     }
 public:
-    GLuint posAttrVertices;
-
-    GLuint posAttrTexCoords;
-
-    GLuint posDistance;
-
-    GLuint posNextFilterId;
-
     int textureNums;
 
     GLuint *textures;
 
-    GLuint posVertex;
-
-    GLuint posTexMat;
-
     jmethodID updatImageMethodId;
+
+    CameraTextureFilter* mCameraFilter;
 };
-
-const GLfloat VERTICES_RENDER[] =
-{
-    -1.0f, 1.0f,//pos0
-    -1.0f, -1.0f,//pos1
-    1.0f, -1.0f,//pos2
-    1.0f, 1.0f,//pos3
-
-};
-
-const GLfloat TEXTURE_RENDER[] =
-{
-        1.0f, 0.0f,//tex0
-        1.0f, 1.0f,//tex1
-        0.0f, 1.0f,//tex2
-        0.0f, 0.0f,//tex3
-
-};
-
 
 
 extern "C" {
