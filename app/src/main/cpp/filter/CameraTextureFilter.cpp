@@ -52,7 +52,7 @@ int CameraTextureFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat
                                            jfloat *mTmpMatrix) {
     this->mverMatrix = mverMatrix;
     this->mTmpMatrix = mTmpMatrix;
-    return BaseFilter::drawToFrameBuffer(target, texture, mverMatrix, mTmpMatrix);
+    return BaseFilter::drawToFrameBuffer(target, texture);
 }
 
 void CameraTextureFilter::setMatrix(jfloat *mverMatrix, jfloat *mTmpMatrix) {

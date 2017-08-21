@@ -21,6 +21,8 @@ void BaseFilter::create(const char *vertex, const char *texture) {
 
 void BaseFilter::initFramebuffer(int width, int height) {
     if (mFrameBuffers != NULL && (frameWidth != width || frameHeight != height)) {
+        frameWidth = width;
+        frameHeight = height;
         destroyFrameBuffer();
     }
     if (mFrameBuffers != NULL) {
@@ -54,15 +56,14 @@ void BaseFilter::destroyFrameBuffer() {
 
 }
 
-int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix,
-                                  jfloat *mTmpMatrix) {
+int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture) {
     if (mFrameBuffers == NULL) {
         return 0;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffers[0]);
 //    glViewport(0, 0, frameWidth, frameHeight);
-    drawFrame(target, texture, mverMatrix, mTmpMatrix);
+    drawFrame(target, texture);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return mFrameBufferTextures[0];

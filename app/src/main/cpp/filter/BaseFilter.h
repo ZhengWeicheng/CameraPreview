@@ -6,6 +6,7 @@
 #define MYOPENGL2_BASEFILTER_H
 
 #include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <jni.h>
 
 class BaseFilter {
@@ -42,7 +43,7 @@ public:
 
     virtual void destroyFrameBuffer();
 
-    virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
+    virtual int drawToFrameBuffer(GLenum target, GLuint texture);
 
     virtual void drawFrame(GLenum target, GLuint texture);
 
