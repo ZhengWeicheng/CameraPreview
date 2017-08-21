@@ -38,20 +38,20 @@ public:
 
     virtual void onCreated();
 
-    void initFrambuffer(int width, int height);
+    virtual void initFramebuffer(int width, int height);
 
-    void destroyFrameBuffer();
+    virtual void destroyFrameBuffer();
 
-    int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
+    virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
     virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
+
+    virtual bool isProgramAvailable();
 
 protected:
     GLuint programId;
     GLuint posAttrVertices;
     GLuint posAttrTexCoords;
-    GLuint posVertex;
-    GLuint posTexMat;
 
     int frameWidth;
     int frameHeight;

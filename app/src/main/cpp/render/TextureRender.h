@@ -15,18 +15,12 @@ public:
     TextureRenderHolder() {
         RenderHolder();
         mCameraFilter = new CameraTextureFilter();
+        mFilter = new BaseFilter();
         textures = NULL;
     }
 
     virtual ~TextureRenderHolder() {
         RenderHolder::~RenderHolder();
-        if (textures != NULL) {
-            glDeleteTextures(textureNums, textures);
-        }
-        if (mCameraFilter != NULL) {
-            delete mCameraFilter;
-            mCameraFilter = NULL;
-        }
     }
 public:
     int textureNums;
@@ -36,14 +30,15 @@ public:
     jmethodID updatImageMethodId;
 
     CameraTextureFilter* mCameraFilter;
+
+    BaseFilter* mFilter;
 };
 
 
 extern "C" {
 JNIEXPORT jlong JNICALL
 Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, jclass type,
-                                                                   jobject surface, jstring vertex_,
-                                                                   jstring fragment_);
+        jobject surface, jobject assetManager,jint width,jint height);
 JNIEXPORT void JNICALL
 Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeRelease(JNIEnv *env, jclass type,
                                                                               jlong holder);

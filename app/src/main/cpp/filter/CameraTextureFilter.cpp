@@ -12,9 +12,16 @@ void CameraTextureFilter::create(const char *vertex, const char *texture) {
     posDistance = (GLuint) glGetUniformLocation(programId, "distance");
 
     posNextFilterId = (GLuint) glGetUniformLocation(programId, "currentFilter");
+
+    posVertex = (GLuint) glGetUniformLocation(programId, "uMVPMatrix");
+
+    posTexMat = (GLuint) glGetUniformLocation(programId, "uTexMatrix");
 }
 
 void CameraTextureFilter::onDrawArraysPre() {
+    glUniformMatrix4fv(posVertex, 1, GL_FALSE, mverMatrix);
+    glUniformMatrix4fv(posTexMat, 1, GL_FALSE, mTmpMatrix);
+
     glUniform1f(posDistance, mDistance);
     glUniform1f(posNextFilterId, mNextFilterId);
 }
@@ -30,13 +37,33 @@ void CameraTextureFilter::setDistanceAndNextFilter(float distance, float nextFil
 }
 
 bool CameraTextureFilter::isProgramAvailable() {
-    return programId > 0;
+    return BaseFilter::isProgramAvailable();
 }
 
 void CameraTextureFilter::drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix,
                                     jfloat *mTmpMatrix) {
     BaseFilter::drawFrame(target, texture, mverMatrix, mTmpMatrix);
 }
+
+void CameraTextureFilter::initFramebuffer(int width, int height) {
+    BaseFilter::initFramebuffer(width, height);
+}
+
+int CameraTextureFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix,
+                                           jfloat *mTmpMatrix) {
+    return BaseFilter::drawToFrameBuffer(target, texture, mverMatrix, mTmpMatrix);
+}
+
+void CameraTextureFilter::setMatrix(jfloat *mverMatrix, jfloat *mTmpMatrix) {
+    this->mverMatrix = mverMatrix;
+    this->mTmpMatrix = mTmpMatrix;
+}
+
+
+
+
+
+
 
 
 

@@ -16,14 +16,10 @@ void BaseFilter::create(const char *vertex, const char *texture) {
 
     posAttrTexCoords = (GLuint) glGetAttribLocation(programId, "aTextureCoord");
 
-    posVertex = (GLuint) glGetUniformLocation(programId, "uMVPMatrix");
-
-    posTexMat = (GLuint) glGetUniformLocation(programId, "uTexMatrix");
-
     onCreated();
 }
 
-void BaseFilter::initFrambuffer(int width, int height) {
+void BaseFilter::initFramebuffer(int width, int height) {
     if (mFrameBuffers != NULL && (frameWidth != width || frameHeight != height)) {
         destroyFrameBuffer();
     }
@@ -68,6 +64,7 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMat
 //    glViewport(0, 0, frameWidth, frameHeight);
     drawFrame(target, texture, mverMatrix, mTmpMatrix);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return mFrameBufferTextures[0];
 }
 
@@ -85,10 +82,6 @@ void BaseFilter::drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jf
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(target, texture);
 
-    glUniformMatrix4fv(posVertex, 1, GL_FALSE, mverMatrix);
-
-    glUniformMatrix4fv(posTexMat, 1, GL_FALSE, mTmpMatrix);
-
     onDrawArraysPre();
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -97,6 +90,7 @@ void BaseFilter::drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jf
 
     glDisableVertexAttribArray(posAttrVertices);
     glDisableVertexAttribArray(posAttrTexCoords);
+    glBindTexture(target, 0);
 }
 
 
@@ -111,6 +105,12 @@ void BaseFilter::onDrawArraysAfter() {
 void BaseFilter::onCreated() {
 
 }
+
+bool BaseFilter::isProgramAvailable() {
+    return programId > 0;
+}
+
+
 
 
 

@@ -113,7 +113,7 @@ public class CameraManager {
         public CameraThread() {
             super("camera thread");
             start();
-            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
             mHandler = new Handler(Looper.myLooper(), this);
         }
 
@@ -322,10 +322,10 @@ public class CameraManager {
                     mVideoBuffer[1] = null;
                     mVideoBuffer = null;
                 }
-//                if (mSurfaceTexture != null) {
-//                    mSurfaceTexture.release();
-//                    mSurfaceTexture = null;
-//                }
+                if (mSurfaceTexture != null) {
+                    mSurfaceTexture.release();
+                    mSurfaceTexture = null;
+                }
             }
         }
 

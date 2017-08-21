@@ -1,5 +1,6 @@
 package com.myopengl.zcweicheng.render;
 
+import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
@@ -11,6 +12,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Surface;
 
+import com.myopengl.zcweicheng.MyApp;
 import com.myopengl.zcweicheng.Utils.AssetsUtils;
 import com.myopengl.zcweicheng.gles.EglCore;
 import com.myopengl.zcweicheng.gles.FullFrameRect;
@@ -102,8 +104,9 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mOutputSurface = (Surface) objects[0];
         String vertex = AssetsUtils.getFromAssets("vertex.glsl");
         String fragment = AssetsUtils.getFromAssets("slide_fragment.glsl");
-
-        enginId = nativeInit(mOutputSurface, vertex, fragment);
+        mWidth = (int) objects[1];
+        mHeight = (int) objects[2];
+        enginId = nativeInit(mOutputSurface, MyApp.getContext().getAssets(), mWidth, mHeight);
         if (enginId == 0) {
             Log.d("aaaaaaa","初始化出错啦");
             return;
@@ -112,8 +115,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mTextureId = nativeGetInputTex(enginId);
         mInputTexture = new SurfaceTexture(mTextureId);
         mInputTexture.setOnFrameAvailableListener(this);
-        mWidth = (int) objects[1];
-        mHeight = (int) objects[2];
+
         mListener = (CameraTextureRender.CameraTextureRenderListener) objects[3];
 
         mCameraIndex = CameraManager.getInstance().getCameraIndex();
@@ -125,9 +127,9 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 
     public void rotateCameraMatrix() {
         if (mCameraIndex == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            Matrix.rotateM(mverMatrix, 0, 180, 0.f, 0.f, 1.f);
-        } else {
             Matrix.rotateM(mverMatrix, 0, 0, 0.f, 0.f, 1.f);
+        } else {
+            Matrix.rotateM(mverMatrix, 0, 180, 0.f, 0.f, 1.f);
         }
     }
 
@@ -158,7 +160,9 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mFrameNum++;
     }
 
-    private static native long nativeInit(Surface surface, String vertex, String fragment);
+//    private static native long nativeInit(Surface surface, String vertex, String fragment);
+
+    private native long nativeInit(Surface output, AssetManager assets, int outWidth, int outHeight);
     private static native void nativeRelease(long holder);
     private static native void nativeDraw(SurfaceTexture surface, float[] mverMatrix, float[] mTmpMatrix,
                                           float distance, float nextFilterId, long holder);

@@ -81,8 +81,7 @@ GLuint createProgram(const char *pVertexSrc, const char *pFragmentSrc) {
     return program;
 }
 
-void createRenderHolder(JNIEnv *env, jobject jSurface,
-                                jstring vertex, jstring fragment, RenderHolder *holder) {
+void createRenderHolder(JNIEnv *env, jobject jSurface, RenderHolder *holder) {
 
     holder->eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (holder->eglDisplay == EGL_NO_DISPLAY) {

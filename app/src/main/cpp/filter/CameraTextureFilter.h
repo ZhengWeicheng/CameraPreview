@@ -15,6 +15,9 @@ public:
         posNextFilterId = 0;
         mDistance = 0.f;
         mNextFilterId = 0.f;
+        mverMatrix = NULL;
+        mTmpMatrix = NULL;
+
     }
 
     ~CameraTextureFilter() {
@@ -24,13 +27,15 @@ public:
 public:
     virtual void create(const char* vertex, const char* texture);
 
-//    virtual void onDrawArraysAfter();
+    virtual void initFramebuffer(int width, int height);
 
-//    virtual void onCreated();
+    virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
     virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
     void setDistanceAndNextFilter(float distance, float nextFilter);
+
+    void setMatrix(jfloat * mverMatrix, jfloat * mTmpMatrix);
 
     bool isProgramAvailable();
 
@@ -42,8 +47,16 @@ public:
 
     GLuint posNextFilterId;
 
+    GLuint posVertex;
+
+    GLuint posTexMat;
+
     float mDistance;
 
     float mNextFilterId;
+
+    jfloat *mverMatrix;
+
+    jfloat *mTmpMatrix;
 };
 #endif //CAMERAPREVIEW_CAMERATEXTUREFILTER_H

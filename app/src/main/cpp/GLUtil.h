@@ -12,8 +12,7 @@ GLuint loadShader(GLenum shaderType, const char *shaderSource);
 
 GLuint createProgram(const char *pVertexSrc, const char *pFragmentSrc);
 
-void createRenderHolder(JNIEnv *env, jobject jSurface, jstring vertex, jstring fragment,
-                        RenderHolder *holder);
+void createRenderHolder(JNIEnv *env, jobject jSurface, RenderHolder *holder);
 
 GLuint* createExternalOESTexture();
 // 角度转弧度
