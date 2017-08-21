@@ -44,7 +44,7 @@ public:
 
     virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
-    virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
+    virtual void drawFrame(GLenum target, GLuint texture);
 
     virtual bool isProgramAvailable();
 

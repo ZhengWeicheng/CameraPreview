@@ -13,6 +13,7 @@ import com.myopengl.zcweicheng.MyApp;
 
 public class TextureTouchListener implements View.OnTouchListener {
 
+    private static final int MAX_FILTER = 4;
     private onTextureTouchListener mListener;
     private float startX, diff, distance;
     private int mWindowWidth;
@@ -49,17 +50,17 @@ public class TextureTouchListener implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
                 isMove = true;
                 diff = event.getX() - startX;
-                if ((diff < 0 && mCurrentFilterId == 4) || (diff > 0 && mCurrentFilterId == 0)) {
+                if ((diff < 0 && mCurrentFilterId == MAX_FILTER) || (diff > 0 && mCurrentFilterId == 0)) {
                     return false;
                 }
-                if ((diff > 0 && mCurrentFilterId == 5)) {
-                    mNextFilterId = 4;
+                if ((diff > 0 && mCurrentFilterId == MAX_FILTER + 1)) {
+                    mNextFilterId = MAX_FILTER;
                 } else if ((diff < 0 && mCurrentFilterId == 0)) {
                     mNextFilterId = 1;
                 } else {
                     mNextFilterId = diff > 0 ? mCurrentFilterId - 1 : mCurrentFilterId + 1;
-                    if (mNextFilterId > 5) {
-                        mNextFilterId = 5;
+                    if (mNextFilterId > MAX_FILTER + 1) {
+                        mNextFilterId = MAX_FILTER + 1;
                     } else if (mNextFilterId < 0) {
                         mNextFilterId = 0;
                     }
@@ -76,7 +77,7 @@ public class TextureTouchListener implements View.OnTouchListener {
 //                    mListener.onDobuleClick();
 //                }
                 isMove = false;
-                if ((diff < 0 && mCurrentFilterId == 5) || (diff > 0 && mCurrentFilterId == 0)) {
+                if ((diff < 0 && mCurrentFilterId == MAX_FILTER + 1) || (diff > 0 && mCurrentFilterId == 0)) {
                     return false;
                 }
                 isChnagingFilter = true;

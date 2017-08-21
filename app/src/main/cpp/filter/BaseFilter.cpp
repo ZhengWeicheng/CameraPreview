@@ -68,7 +68,7 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMat
     return mFrameBufferTextures[0];
 }
 
-void BaseFilter::drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix) {
+void BaseFilter::drawFrame(GLenum target, GLuint texture) {
 
     glUseProgram(programId);
     //输入顶点

@@ -31,7 +31,7 @@ public:
 
     virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
-    virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
+    virtual void drawFrame(GLenum target, GLuint texture);
 
     void setDistanceAndNextFilter(float distance, float nextFilter);
 

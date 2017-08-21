@@ -102,12 +102,11 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeDraw(JNIEnv *env, 
     env->CallVoidMethod(surface, holder->updatImageMethodId);
 
     holder->mCameraFilter->setDistanceAndNextFilter(distance, nextFilterId);
-    holder->mCameraFilter->setMatrix(mverMatrix, mTmpMatrix);
 
-    int textureId = holder->mCameraFilter->drawToFrameBuffer(GL_TEXTURE_EXTERNAL_OES, holder->textures[0],
-            mverMatrix, mTmpMatrix);
+    int textureId = holder->mCameraFilter->drawToFrameBuffer(GL_TEXTURE_EXTERNAL_OES,
+            holder->textures[0], mverMatrix, mTmpMatrix);
 
-    holder->mFilter->drawFrame(GL_TEXTURE_2D, (GLuint) textureId, 0, 0);
+    holder->mFilter->drawFrame(GL_TEXTURE_2D, (GLuint) textureId);
 
     eglSwapBuffers(holder->eglDisplay, holder->eglSurface);
 

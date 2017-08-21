@@ -18,12 +18,16 @@ add_library( # Sets the name of the library.
              # Provides a relative path to your source file(s).
              # Associated headers in the same location as their source
              # file are automatically included.
+             #utils
              src/main/cpp/GLUtil.cpp
              src/main/cpp/JNIUtils.cpp
+             #render
              src/main/cpp/render/DataRender.cpp
              src/main/cpp/render/TextureRender.cpp
+             #filter
              src/main/cpp/filter/BaseFilter.cpp
              src/main/cpp/filter/CameraTextureFilter.cpp
+             src/main/cpp/filter/RecordFilter.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
