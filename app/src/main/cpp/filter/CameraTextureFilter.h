@@ -2,10 +2,9 @@
 // Created by Administrator on 2017/8/19.
 //
 
-#include "BaseFilter.h"
-
 #ifndef CAMERAPREVIEW_CAMERATEXTUREFILTER_H
 #define CAMERAPREVIEW_CAMERATEXTUREFILTER_H
+#include "BaseFilter.h"
 class CameraTextureFilter : BaseFilter {
 
 public:
@@ -18,9 +17,20 @@ public:
         mverMatrix = NULL;
         mTmpMatrix = NULL;
 
+        mRowStride = 0;
+        mPboIndex = 0;
+        mPboNewIndex = 0;
+        mLastTimestamp = 0;//图像时间戳，用于录制帧数判断
+        mRecordEnabled = false;
+        mInitRecord = false;
+        mPixelBuffers = NULL;
+
     }
 
     ~CameraTextureFilter() {
+        if (mPixelBuffers != NULL) {
+            destroyPixelBuffer();
+        }
         BaseFilter::~BaseFilter();
     }
 
@@ -39,8 +49,18 @@ public:
 
     bool isProgramAvailable();
 
+    void initPixelBuffer(int width, int height);
+
+    void destroyPixelBuffer();
+
+    void bindPixelBuffer();
+
+    void unbindPixelBuffer();
+
 private:
-    virtual void onDrawArraysPre();
+    void onDrawArraysPre();
+
+    void onDrawArraysAfter();
 
 public:
     GLuint posDistance;
@@ -58,5 +78,15 @@ public:
     jfloat *mverMatrix;
 
     jfloat *mTmpMatrix;
+
+
+    int mRowStride;
+    int mPboIndex;
+    int mPboNewIndex;
+    int mPboSize;
+    long mLastTimestamp;//图像时间戳，用于录制帧数判断
+    bool mRecordEnabled;
+    bool mInitRecord;
+    GLuint* mPixelBuffers;
 };
 #endif //CAMERAPREVIEW_CAMERATEXTUREFILTER_H

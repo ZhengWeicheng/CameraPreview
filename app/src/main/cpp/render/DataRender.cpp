@@ -1,5 +1,5 @@
 #include "DataRender.h"
-#include "../GLUtil.h"
+#include "../utils/GLUtil.h"
 #include <android/native_window_jni.h>
 #include <sstream>
 #include <android/asset_manager_jni.h>

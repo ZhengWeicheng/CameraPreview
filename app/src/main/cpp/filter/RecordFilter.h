@@ -2,10 +2,11 @@
 // Created by Administrator on 2017/8/21 0021.
 //
 
-#include "BaseFilter.h"
+
 
 #ifndef MYOPENGL2_RECORDFILTER_H
 #define MYOPENGL2_RECORDFILTER_H
+#include "BaseFilter.h"
 //RGBA 4字节
 #define PIXEL_STRIDE 4;
 
@@ -51,7 +52,9 @@ public:
 
     void destroyPixelBuffer();
 
+    void bindPixelBuffer();
 
+    void unbindPixelBuffer();
 
 
 private:

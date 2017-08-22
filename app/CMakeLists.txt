@@ -19,8 +19,8 @@ add_library( # Sets the name of the library.
              # Associated headers in the same location as their source
              # file are automatically included.
              #utils
-             src/main/cpp/GLUtil.cpp
-             src/main/cpp/JNIUtils.cpp
+             src/main/cpp/utils/GLUtil.cpp
+             src/main/cpp/utils/JNIUtils.cpp
              #render
              src/main/cpp/render/DataRender.cpp
              src/main/cpp/render/TextureRender.cpp
@@ -50,6 +50,7 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
                        native-lib
                        EGL
-                       GLESv2
+                       #GLESv2
+                       GLESv3
                        log
                        android )

@@ -4,10 +4,9 @@
 
 #ifndef MYOPENGL2_BASEFILTER_H
 #define MYOPENGL2_BASEFILTER_H
-
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
 #include <jni.h>
+#include <cwchar>
+#include <GLES3/gl3.h>
 
 class BaseFilter {
 public:
@@ -49,6 +48,10 @@ public:
 
     virtual bool isProgramAvailable();
 
+private:
+    GLuint createProgram(const char *pVertexSrc, const char *pFragmentSrc);
+    GLuint loadShader(GLenum shaderType, const char *shaderSource);
+    void checkGlError(const char *op);
 protected:
     GLuint programId;
     GLuint posAttrVertices;

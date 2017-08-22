@@ -1,10 +1,9 @@
 
 #include "GLUtil.h"
-#include "log.h"
-#include "RenderHolder.h"
+#include "../log.h"
 #include <stdlib.h>
 #include <android/native_window_jni.h>
-#include <GLES2/gl2ext.h>
+//#include <GLES2/gl2ext.h>
 
 #define LOG_TAG "GLUtil"
 
@@ -147,11 +146,11 @@ void createRenderHolder(JNIEnv *env, jobject jSurface, RenderHolder *holder) {
 GLuint* createExternalOESTexture() {
     GLuint *textures = new GLuint[1];
     glGenTextures(1, textures);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
+//    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     return textures;
 }
 

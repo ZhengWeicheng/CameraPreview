@@ -4,8 +4,8 @@
 
 #include <jni.h>
 #include "TextureRender.h"
-#include "../GLUtil.h"
-#include "../JNIUtils.h"
+#include "../utils/GLUtil.h"
+#include "../utils/JNIUtils.h"
 #include <GLES2/gl2ext.h>
 #include <android/asset_manager_jni.h>
 
@@ -34,6 +34,8 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
     }
 
     holder->mCameraFilter->initFramebuffer(width, height);
+
+    holder->mCameraFilter->initPixelBuffer(width, height);
 
     const char* baseVertex = getGLSLStr(mgr, "ext_vertex.glsl");
     const char* baseFragment = getGLSLStr(mgr, "ext_fragment.glsl");

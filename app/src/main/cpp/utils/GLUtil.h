@@ -4,7 +4,7 @@
 
 #include <GLES2/gl2.h>
 #include <jni.h>
-#include "RenderHolder.h"
+#include "../RenderHolder.h"
 
 void checkGlError(const char *op);
 
