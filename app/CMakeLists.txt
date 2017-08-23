@@ -28,6 +28,14 @@ add_library( # Sets the name of the library.
              src/main/cpp/filter/BaseFilter.cpp
              src/main/cpp/filter/CameraTextureFilter.cpp
              src/main/cpp/filter/RecordFilter.cpp
+
+             src/main/cpp/encode/jx_yuv_encode_h264.cpp
+             src/main/cpp/encode/jx_pcm_encode_aac.cpp
+             src/main/cpp/encode/jx_media_muxer.cpp
+             src/main/cpp/encode/jx_jni_handler.cpp
+             src/main/cpp/encode/jx_ffmpeg_jni.cpp
+             src/main/cpp/encode/threadsafe_queue.cpp
+             src/main/cpp/encode/jx_log.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -47,10 +55,13 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in the
 # build script, prebuilt third-party libraries, or system libraries.
 
+
 target_link_libraries( # Specifies the target library.
                        native-lib
                        EGL
                        #GLESv2
                        GLESv3
                        log
-                       android )
+                       android
+
+                       )
