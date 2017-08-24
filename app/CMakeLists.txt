@@ -29,13 +29,19 @@ add_library( # Sets the name of the library.
              src/main/cpp/filter/CameraTextureFilter.cpp
              src/main/cpp/filter/RecordFilter.cpp
 
-             src/main/cpp/encode/jx_yuv_encode_h264.cpp
-             src/main/cpp/encode/jx_pcm_encode_aac.cpp
-             src/main/cpp/encode/jx_media_muxer.cpp
-             src/main/cpp/encode/jx_jni_handler.cpp
-             src/main/cpp/encode/jx_ffmpeg_jni.cpp
-             src/main/cpp/encode/threadsafe_queue.cpp
-             src/main/cpp/encode/jx_log.cpp
+                           src/main/cpp/encode/jx_yuv_encode_h264.cpp
+                           src/main/cpp/encode/jx_pcm_encode_aac.cpp
+                           src/main/cpp/encode/jx_media_muxer.cpp
+                           src/main/cpp/encode/jx_jni_handler.cpp
+                           src/main/cpp/encode/jx_ffmpeg_jni.cpp
+                           src/main/cpp/encode/threadsafe_queue.cpp
+                           src/main/cpp/encode/jx_log.cpp
+                           src/main/cpp/encode/cmdutils.c
+                           src/main/cpp/encode/ffmpeg.c
+                           src/main/cpp/encode/ffmpeg_filter.c
+                           src/main/cpp/encode/ffmpeg_opt.c
+                           src/main/cpp/encode/jx_ffmpeg_cmd_run.c
+                           src/main/cpp/encode/jx_ffmpeg_config.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -43,6 +49,98 @@ add_library( # Sets the name of the library.
 # default, you only need to specify the name of the public NDK library
 # you want to add. CMake verifies that the library exists before
 # completing its build.
+
+add_library(
+            avcodec
+            SHARED
+            IMPORTED
+            )
+
+add_library(
+            avfilter
+            SHARED
+            IMPORTED
+             )
+
+
+add_library(
+            avformat
+            SHARED
+            IMPORTED
+            )
+
+
+add_library(
+            avutil
+            SHARED
+            IMPORTED
+            )
+
+add_library(
+            swresample
+            SHARED
+            IMPORTED
+            )
+
+add_library(
+            swscale
+            SHARED
+            IMPORTED
+            )
+
+add_library(
+            fdk-aac
+            SHARED
+            IMPORTED
+            )
+
+
+set_target_properties(
+    avcodec
+    PROPERTIES IMPORTED_LOCATION
+    ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavcodec.so
+    )
+
+set_target_properties(
+        avfilter
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavfilter.so
+        )
+
+set_target_properties(
+            avformat
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavformat.so
+            )
+
+set_target_properties(
+            avutil
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavutil.so
+            )
+
+set_target_properties(
+            swresample
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libswresample.so
+             )
+
+set_target_properties(
+            swscale
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libswscale.so
+             )
+
+set_target_properties(
+         fdk-aac
+         PROPERTIES IMPORTED_LOCATION
+          ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libfdk-aac.so
+          )
+
+include_directories(
+ ${CMAKE_SOURCE_DIR}/src/main/cpp/encode/include/
+ )
+
 
 find_library( # Sets the name of the path variable.
               log-lib
@@ -55,7 +153,6 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in the
 # build script, prebuilt third-party libraries, or system libraries.
 
-
 target_link_libraries( # Specifies the target library.
                        native-lib
                        EGL
@@ -63,5 +160,11 @@ target_link_libraries( # Specifies the target library.
                        GLESv3
                        log
                        android
+                       avcodec
+                       avfilter
+                       avformat
+                       avutil
+                       swresample
+                       swscale
 
                        )

@@ -8,7 +8,7 @@
 #define JIANXIFFMPEG_JX_USER_ARGUMENTS_H
 
 
-#include "jni.h"
+#include <jni.h>
 class JXJNIHandler;
 typedef struct UserArguments {
     const char *media_base_path; //文件储存地址

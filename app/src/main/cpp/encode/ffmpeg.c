@@ -1223,14 +1223,14 @@ static void do_video_out(OutputFile *of,
                 ost->forced_keyframes_expr_const_values[FKF_T] = pts_time;
                 res = av_expr_eval(ost->forced_keyframes_pexpr,
                                    ost->forced_keyframes_expr_const_values, NULL);
-                ff_dlog(NULL,
-                        "force_key_frame: n:%f n_forced:%f prev_forced_n:%f t:%f prev_forced_t:%f -> res:%f\n",
-                        ost->forced_keyframes_expr_const_values[FKF_N],
-                        ost->forced_keyframes_expr_const_values[FKF_N_FORCED],
-                        ost->forced_keyframes_expr_const_values[FKF_PREV_FORCED_N],
-                        ost->forced_keyframes_expr_const_values[FKF_T],
-                        ost->forced_keyframes_expr_const_values[FKF_PREV_FORCED_T],
-                        res);
+//                ff_dlog(NULL,
+//                        "force_key_frame: n:%f n_forced:%f prev_forced_n:%f t:%f prev_forced_t:%f -> res:%f\n",
+//                        ost->forced_keyframes_expr_const_values[FKF_N],
+//                        ost->forced_keyframes_expr_const_values[FKF_N_FORCED],
+//                        ost->forced_keyframes_expr_const_values[FKF_PREV_FORCED_N],
+//                        ost->forced_keyframes_expr_const_values[FKF_T],
+//                        ost->forced_keyframes_expr_const_values[FKF_PREV_FORCED_T],
+//                        res);
                 if (res) {
                     forced_keyframe = 1;
                     ost->forced_keyframes_expr_const_values[FKF_PREV_FORCED_N] =
