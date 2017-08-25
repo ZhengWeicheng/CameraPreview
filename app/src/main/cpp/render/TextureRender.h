@@ -5,10 +5,16 @@
 #ifndef MYOPENGL2_TEXTURERENDER_H
 #define MYOPENGL2_TEXTURERENDER_H
 
+#define VIDEO_FORMAT ".h264"
+#define MEDIA_FORMAT ".mp4"
+#define AUDIO_FORMAT ".aac"
+
 #include <jni.h>
 #include "../RenderHolder.h"
 #include "../filter/BaseFilter.h"
 #include "../filter/CameraTextureFilter.h"
+#include "../encode/jx_yuv_encode_h264.h"
+#include "../encode/jx_pcm_encode_aac.h"
 
 class TextureRenderHolder : public RenderHolder {
 public:
@@ -17,6 +23,7 @@ public:
         mCameraFilter = new CameraTextureFilter();
         mFilter = new BaseFilter();
         textures = NULL;
+
     }
 
     virtual ~TextureRenderHolder() {
@@ -59,5 +66,19 @@ JNIEXPORT jlong JNICALL
         Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeGetEglContext(JNIEnv *env,
                                                                                     jclass type,
                                                                                     jlong engine);
+
+JNIEXPORT jint JNICALL
+Java_com_myopengl_zcweicheng_render_CameraTextureThread_stopRecord(JNIEnv *env, jclass type, jlong engine);
+
+JNIEXPORT jint JNICALL
+Java_com_myopengl_zcweicheng_render_CameraTextureThread_startRecord(JNIEnv *env, jclass type, jlong engine,
+                                                                    jstring mediaBasePath_,
+                                                                    jstring mediaName_, jint filter,
+                                                                    jint in_width, jint in_height,
+                                                                    jint out_width, jint out_height,
+                                                                    jint frameRate,
+                                                                    jlong bit_rate);
+
+static void onDataCallback(JXYUVEncodeH264 *h264_encoder, uint8_t *buf);
 }
 #endif //MYOPENGL2_TEXTURERENDER_H

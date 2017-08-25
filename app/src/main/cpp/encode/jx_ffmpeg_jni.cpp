@@ -16,7 +16,6 @@ using namespace std;
 JXYUVEncodeH264 *h264_encoder;
 JXPCMEncodeAAC *aac_encoder;
 
-
 #define VIDEO_FORMAT ".h264"
 #define MEDIA_FORMAT ".mp4"
 #define AUDIO_FORMAT ".aac"

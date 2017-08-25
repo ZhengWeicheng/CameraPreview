@@ -12,7 +12,7 @@ public class FFmpegBridge {
         System.loadLibrary("swscale");
         System.loadLibrary("swresample");
         System.loadLibrary("avfilter");
-        System.loadLibrary("jx_ffmpeg_jni");
+        System.loadLibrary("native-lib");
     }
 
     /**

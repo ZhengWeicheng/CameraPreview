@@ -141,7 +141,6 @@ include_directories(
  ${CMAKE_SOURCE_DIR}/src/main/cpp/encode/include/
  )
 
-
 find_library( # Sets the name of the path variable.
               log-lib
 

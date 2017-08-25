@@ -3,8 +3,11 @@ package com.myopengl.zcweicheng.ui.activity;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 
 import com.myopengl.zcweicheng.R;
 import com.myopengl.zcweicheng.manager.CameraManager;
@@ -30,7 +33,22 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_preview);
-
+        final Button button = (Button) findViewById(R.id.record_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isSelected = button.isSelected();
+                button.setText(isSelected ? "开始" : "结束");
+                button.setSelected(!isSelected);
+                if (mRender != null) {
+                    if (isSelected) {
+                        mRender.stopRecord();
+                    } else {
+                        mRender.startRecord();
+                    }
+                }
+            }
+        });
         textureView = (TextureView) findViewById(R.id.preview_texture);
         textureView.setSurfaceTextureListener(this);
         textureView.setOnTouchListener(new TextureTouchListener(new onTextureTouchListener() {

@@ -37,7 +37,9 @@ void CameraTextureFilter::setDistanceAndNextFilter(float distance, float nextFil
 
 
 void CameraTextureFilter::onDrawArraysAfter() {
-    bindPixelBuffer();
+    if (isEncode) {
+        bindPixelBuffer();
+    }
 }
 
 bool CameraTextureFilter::isProgramAvailable() {
@@ -114,7 +116,9 @@ void CameraTextureFilter::bindPixelBuffer() {
 
     //glMapBufferRange会等待DMA传输完成，所以需要交替使用pbo
     void* buffer = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, mPboSize, GL_MAP_READ_BIT);
-
+    if (h264_encoder != NULL && buffer != NULL) {
+        h264_encoder->startSendOneFrame((uint8_t *) buffer);
+    }
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     unbindPixelBuffer();
 

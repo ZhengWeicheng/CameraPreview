@@ -1,4 +1,3 @@
-
 /**
  * Created by jianxi on 2017/5/12.
  * https://github.com/mabeijianxi
@@ -10,7 +9,6 @@
 
 
 #include "base_include.h"
-
 #include "jx_user_arguments.h"
 
 using namespace std;
@@ -37,7 +35,46 @@ public:
                        int in_y_size,
                        int format);
     ~JXYUVEncodeH264() {
+        if (arguments != NULL) {
+            if (arguments->handler != NULL) {
+                delete(arguments->handler);
+                arguments->handler = NULL;
+            }
+            delete(arguments);
+            arguments = NULL;
+        }
+        //Clean
+        if (video_st != NULL) {
+            avcodec_close(video_st->codec);
+            av_free(pFrame);
+            delete(video_st);
+            delete(pFrame);
+            delete(pCodecCtx);
+            video_st = NULL;
+            pFrame = NULL;
+            pCodecCtx = NULL;
+        }
+        if (pFormatCtx != NULL) {
+            av_write_trailer(pFormatCtx);
+            avio_close(pFormatCtx->pb);
+            avformat_free_context(pFormatCtx);
+            delete(pFormatCtx);
+            delete(pFormatCtx->pb);
+            pFormatCtx = NULL;
+            pFormatCtx->pb = NULL;
+        }
+
+        if (swsContext != NULL) {
+            sws_freeContext(swsContext);
+            swsContext = NULL;
+        }
+        if (pFrameYUV != NULL) {
+            av_free(pFrameYUV);
+            delete(pFrameYUV);
+            pFrameYUV = NULL;
+        }
     }
+
 private:
     int flush_encoder(AVFormatContext *fmt_ctx, unsigned int stream_index);
 
@@ -57,6 +94,8 @@ private:
     int out_y_size;
     int framecnt = 0;
     int frame_count = 0;
+    SwsContext* swsContext;
+    AVFrame *pFrameYUV;
 
 
 };

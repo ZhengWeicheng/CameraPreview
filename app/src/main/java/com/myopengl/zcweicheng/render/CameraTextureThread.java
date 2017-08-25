@@ -5,6 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -160,6 +161,23 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
         mFrameNum++;
     }
 
+    public void startEncode() {
+        if (enginId == 0) {
+            Log.d(TAG, "START ENCODE ERROR");
+            return;
+        }
+        startRecord(enginId, Environment.getExternalStorageDirectory().getAbsolutePath(),
+                String.valueOf(System.currentTimeMillis()), 0, mWidth, mHeight, mWidth, mHeight, 20, 1000000);
+    }
+
+    public void stopEncode() {
+        if (enginId == 0) {
+            Log.d(TAG, "stopEncode ERROR");
+            return;
+        }
+        stopRecord(enginId);
+    }
+
 //    private static native long nativeInit(Surface surface, String vertex, String fragment);
 
     private native long nativeInit(Surface output, AssetManager assets, int outWidth, int outHeight);
@@ -167,8 +185,30 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private static native void nativeDraw(SurfaceTexture surface, float[] mverMatrix, float[] mTmpMatrix,
                                           float distance, float nextFilterId, long holder);
 
-    private static native int nativeGetInputTex(long engine);
+    /**
+     *  录制结束
+     * @return
+     */
+    public static native int stopRecord(long enginId);
 
+    /**
+     *
+     * @param mediaBasePath 视频存放目录
+     * @param mediaName 视频名称
+     * @param filter 旋转镜像剪切处理
+     * @param in_width 输入视频宽度
+     * @param in_height 输入视频高度
+     * @param out_height 输出视频高度
+     * @param out_width 输出视频宽度
+     * @param frameRate 视频帧率
+     * @param bit_rate 视频比特率
+     * @return
+     */
+    public static native int startRecord(long enginId, String mediaBasePath, String mediaName,
+            int filter,int in_width, int in_height, int out_width, int  out_height, int frameRate, long bit_rate);
+
+
+    private static native int nativeGetInputTex(long engine);
     private static native long nativeGetEglContext(long engine);
 
 }

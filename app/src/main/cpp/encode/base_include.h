@@ -14,6 +14,7 @@ extern "C"
 #include "include/libavformat/avformat.h"
 #include "include/libavcodec/avcodec.h"
 #include "include/libavutil/opt.h"
+#include "include/libswscale/swscale.h"
 }
 
 #include "threadsafe_queue.cpp"

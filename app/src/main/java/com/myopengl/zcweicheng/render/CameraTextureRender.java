@@ -19,6 +19,13 @@ import static com.myopengl.zcweicheng.render.CameraTextureThread.MSG_SET_SCALE;
 
 public class CameraTextureRender {
     static {
+        System.loadLibrary("avutil");
+        System.loadLibrary("fdk-aac");
+        System.loadLibrary("avcodec");
+        System.loadLibrary("avformat");
+        System.loadLibrary("swscale");
+        System.loadLibrary("swresample");
+        System.loadLibrary("avfilter");
         System.loadLibrary("native-lib");
     }
     private CameraTextureThread mCameraTextureThread;
@@ -50,6 +57,14 @@ public class CameraTextureRender {
     public void setFilterId(float filterId) {
         Message.obtain(mCameraTextureThread.getHandler(), MSG_SET_FILTER_ID,
                 filterId).sendToTarget();
+    }
+
+    public void startRecord() {
+        mCameraTextureThread.startEncode();
+    }
+
+    public void stopRecord() {
+        mCameraTextureThread.stopEncode();
     }
 
     public void rotateCameraMatrix() {

@@ -5,6 +5,9 @@
 #ifndef CAMERAPREVIEW_CAMERATEXTUREFILTER_H
 #define CAMERAPREVIEW_CAMERATEXTUREFILTER_H
 #include "BaseFilter.h"
+#include "../encode/jx_yuv_encode_h264.h"
+#include "../encode/jx_pcm_encode_aac.h"
+
 class CameraTextureFilter : BaseFilter {
 
 public:
@@ -16,7 +19,7 @@ public:
         mNextFilterId = 0.f;
         mverMatrix = NULL;
         mTmpMatrix = NULL;
-
+        isEncode = false;
         mRowStride = 0;
         mPboIndex = 0;
         mPboNewIndex = 0;
@@ -24,12 +27,22 @@ public:
         mRecordEnabled = false;
         mInitRecord = false;
         mPixelBuffers = NULL;
+        h264_encoder = NULL;
+        aac_encoder = NULL;
 
     }
 
-    ~CameraTextureFilter() {
+    virtual  ~CameraTextureFilter() {
         if (mPixelBuffers != NULL) {
             destroyPixelBuffer();
+        }
+        if (h264_encoder != NULL) {
+            delete(h264_encoder);
+            h264_encoder = NULL;
+        }
+        if (aac_encoder != NULL) {
+            delete(aac_encoder);
+            aac_encoder = NULL;
         }
         BaseFilter::~BaseFilter();
     }
@@ -79,6 +92,11 @@ public:
 
     jfloat *mTmpMatrix;
 
+
+    bool isEncode;
+
+    JXYUVEncodeH264 *h264_encoder;
+    JXPCMEncodeAAC *aac_encoder;
 
     int mRowStride;
     int mPboIndex;

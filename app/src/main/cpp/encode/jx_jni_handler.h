@@ -10,6 +10,7 @@
 
 #include "jx_user_arguments.h"
 class JXJNIHandler{
+public:
     ~JXJNIHandler(){
 //        delete(arguments);
     }
