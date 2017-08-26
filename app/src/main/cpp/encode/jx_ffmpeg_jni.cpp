@@ -5,16 +5,27 @@
  */
 #include <jni.h>
 #include <string>
+#include <GLES2/gl2.h>
 #include "jx_yuv_encode_h264.h"
 #include "jx_pcm_encode_aac.h"
 #include "jx_jni_handler.h"
 #include "jx_ffmpeg_config.h"
 #include "jx_log.h"
+#include "../utils/GLUtil.h"
 
 using namespace std;
 
 JXYUVEncodeH264 *h264_encoder;
 JXPCMEncodeAAC *aac_encoder;
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_myopengl_zcweicheng_encode_FFmpegBridge_glReadPixels(JNIEnv *env, jclass type_, jint x,
+                                                              jint y, jint width, jint height,
+                                                              jint format, jint type) {
+    glReadPixels(x, y, width, height, format, type, 0);
+    checkGlError("glReadPixels");
+}
 
 #define VIDEO_FORMAT ".h264"
 #define MEDIA_FORMAT ".mp4"

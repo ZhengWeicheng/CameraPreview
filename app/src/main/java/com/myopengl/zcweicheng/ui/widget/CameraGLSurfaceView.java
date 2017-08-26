@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import com.myopengl.zcweicheng.Utils.CameraHelper;
 import com.myopengl.zcweicheng.Utils.OpenGlUtils;
 import com.myopengl.zcweicheng.filter.CameraInputFilter;
+import com.myopengl.zcweicheng.filter.RecordFilter;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -25,6 +26,9 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
     private int mTextureId;
     private SurfaceTexture mSurfaceTexture;
     private CameraInputFilter mCameraInputFilter;
+    private RecordFilter mRecordFilter;
+    private int mRecordWidth;
+    private int mRecordHeight;
 
     public CameraGLSurfaceView(Context context) {
         this(context, null);
@@ -46,11 +50,11 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
             mCameraInputFilter = new CameraInputFilter();
             mCameraInputFilter.init(getContext());
         }
-//        if (mRecordFilter == null) {
-//            mRecordFilter = new RecordFilter();
-//            mRecordFilter.init(getContext());
+        if (mRecordFilter == null) {
+            mRecordFilter = new RecordFilter();
+            mRecordFilter.init(getContext());
 //            mRecordFilter.setRecordListener(mOnRecordListener);
-//        }
+        }
 
         if (mTextureId == OpenGlUtils.NO_TEXTURE) {
             mTextureId = OpenGlUtils.getExternalOESTextureID();
@@ -79,12 +83,9 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
         mCameraInputFilter.updateBuffer(data);
 
         //重新计算录制顶点、纹理坐标
-//        float[][] data = adjustSize(mRecordWidth, mRecordHeight, info.orientation,
-//                info.isFront, !info.isFront);
-//        mRecordCubeBuffer.clear();
-//        mRecordCubeBuffer.put(data[0]).position(0);
-//        mRecordTextureBuffer.clear();
-//        mRecordTextureBuffer.put(data[1]).position(0);
+        float[][] data1 = adjustSize(mRecordWidth, mRecordHeight, info.orientation,
+                info.isFront, !info.isFront);
+        mRecordFilter.updateBuffer(data1);
     }
 
     @Override
@@ -104,8 +105,7 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
         mCameraInputFilter.onDrawFrame(id);
 
         //绘制到另一个fbo上，同时使用pbo获取数据
-//        mRecordFilter.onDrawToFbo(id, mRecordCubeBuffer, mRecordTextureBuffer,
-//                mSurfaceTexture.getTimestamp());
+        mRecordFilter.onDrawToFbo(id);
     }
 
     @Override
@@ -115,10 +115,10 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
         mCameraInputFilter.onDisplaySizeChanged(mSurfaceWidth, mSurfaceHeight);
 
         //初始化fbo，pbo
-//        mRecordFilter.initFrameBuffer(mRecordWidth, mRecordHeight);
-//        mRecordFilter.initPixelBuffer(mRecordWidth, mRecordHeight);
-//        mRecordFilter.onInputSizeChanged(mRecordWidth, mRecordHeight);
-//        mRecordFilter.onDisplaySizeChanged(mSurfaceWidth, mSurfaceHeight);
+        mRecordFilter.initFrameBuffer(mRecordWidth, mRecordHeight);
+        mRecordFilter.initPixelBuffer(mRecordWidth, mRecordHeight);
+        mRecordFilter.onInputSizeChanged(mRecordWidth, mRecordHeight);
+        mRecordFilter.onDisplaySizeChanged(mSurfaceWidth, mSurfaceHeight);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class CameraGLSurfaceView extends BaseGLSurfaceView implements GLSurfaceV
     private void review() {
         mPreviewWidth = mCameraHelper.getPreviewWidth();
         mPreviewHeight = mCameraHelper.getPreviewHeight();
-//        mRecordWidth = mCameraHelper.getRecordWidth();
-//        mRecordHeight = mCameraHelper.getRecordHeight();
+        mRecordWidth = mCameraHelper.getRecordWidth();
+        mRecordHeight = mCameraHelper.getRecordHeight();
     }
 }

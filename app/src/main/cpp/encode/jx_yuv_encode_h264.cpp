@@ -180,11 +180,10 @@ int JXYUVEncodeH264::initVideoEncoder() {
  * @param buf
  * @return
  */
-int JXYUVEncodeH264::startSendOneFrame(uint8_t *buf) {
+int JXYUVEncodeH264::startSendOneFrame(void *buf) {
     int in_y_size = arguments->in_width * arguments->in_height;
-
     uint8_t *new_buf = (uint8_t *) malloc(in_y_size * 4);
-    memcpy(new_buf, buf, in_y_size * 4);
+    memcpy(new_buf, (uint8_t *)buf, in_y_size * 4);
 
     frame_queue.push(new_buf);
 
@@ -214,14 +213,14 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
         LOGI(JNI_DEBUG, "send_videoframe_count:%d", h264_encoder->frame_count);
 //        int in_y_size = h264_encoder->arguments->in_width * h264_encoder->arguments->in_height;
 
-//        h264_encoder->pFrame->data[0] = picture_buf;
-//        h264_encoder->pFrame->data[1] = picture_buf + h264_encoder->out_y_size;
-//        h264_encoder->pFrame->data[2] = picture_buf + h264_encoder->out_y_size * 2;
-//        h264_encoder->pFrame->data[3] = picture_buf + h264_encoder->out_y_size * 3;
-        memcpy(h264_encoder->pFrameYUV->data[0],picture_buf,h264_encoder->out_y_size);
-        memcpy(h264_encoder->pFrameYUV->data[1],picture_buf+h264_encoder->out_y_size,h264_encoder->out_y_size* 2);
-        memcpy(h264_encoder->pFrameYUV->data[2],picture_buf+h264_encoder->out_y_size * 2,h264_encoder->out_y_size* 3);
-        memcpy(h264_encoder->pFrameYUV->data[3],picture_buf+h264_encoder->out_y_size* 3,h264_encoder->out_y_size* 4);
+        h264_encoder->pFrameYUV->data[0] = picture_buf;
+        h264_encoder->pFrameYUV->data[1] = picture_buf + h264_encoder->out_y_size;
+        h264_encoder->pFrameYUV->data[2] = picture_buf + h264_encoder->out_y_size * 2;
+        h264_encoder->pFrameYUV->data[3] = picture_buf + h264_encoder->out_y_size * 3;
+//        memcpy(h264_encoder->pFrameYUV->data[0],picture_buf,h264_encoder->out_y_size);
+//        memcpy(h264_encoder->pFrameYUV->data[1],picture_buf+h264_encoder->out_y_size,h264_encoder->out_y_size* 2);
+//        memcpy(h264_encoder->pFrameYUV->data[2],picture_buf+h264_encoder->out_y_size * 2,h264_encoder->out_y_size* 3);
+//        memcpy(h264_encoder->pFrameYUV->data[3],picture_buf+h264_encoder->out_y_size* 3,h264_encoder->out_y_size* 4);
 
         sws_scale(h264_encoder->swsContext, (const uint8_t* const*)h264_encoder->pFrameYUV,
                   h264_encoder->pFrameYUV->linesize, 0, h264_encoder->arguments->in_height,
@@ -377,18 +376,6 @@ int JXYUVEncodeH264::encodeEnd() {
         LOGE(JNI_DEBUG, "Flushing encoder failed\n");
         return -1;
     }
-
-    //Write file trailer
-    av_write_trailer(pFormatCtx);
-
-    //Clean
-    if (video_st) {
-        avcodec_close(video_st->codec);
-        av_free(pFrame);
-//        av_free(picture_buf);
-    }
-    avio_close(pFormatCtx->pb);
-    avformat_free_context(pFormatCtx);
     LOGI(JNI_DEBUG, "视频编码结束")
     arguments->handler->setup_video_state(END_STATE);
 //    arguments->handler->try_encode_over(arguments);

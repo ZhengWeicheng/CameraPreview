@@ -4,6 +4,7 @@ import android.opengl.GLES20;
 import android.opengl.GLES30;
 
 import com.myopengl.zcweicheng.Utils.OpenGlUtils;
+import com.myopengl.zcweicheng.encode.FFmpegBridge;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -29,17 +30,17 @@ public class RecordFilter extends BaseFilter {
     private boolean mInitRecord;
 
 //    private RecordHelper mRecordHelper;
-    private int mInputWidth;
-    private int mInputHeight;
+//    private int mInputWidth;
+//    private int mInputHeight;
 
     public RecordFilter() {
-        super("none_vertex.glsl", "default_fragment.glsl");
+        super("default_vertex.glsl", "default_fragment.glsl");
 //        mRecordHelper = new RecordHelper();
-        setTextureTransformMatrix(new float[]{
-                -1f, 0f, 0f, 0f,
-                0f, 1f, 0f, 0f,
-                0f, 0f, 1f, 0f,
-                1f, 0f, 0f, 1f});
+//        setTextureTransformMatrix(new float[]{
+//                -1f, 0f, 0f, 0f,
+//                0f, 1f, 0f, 0f,
+//                0f, 0f, 1f, 0f,
+//                1f, 0f, 0f, 1f});
     }
 
     @Override
@@ -108,12 +109,11 @@ public class RecordFilter extends BaseFilter {
         return mRecordEnabled;
     }
 
-    public int onDrawToFbo(final int textureId, final FloatBuffer cubeBuffer,
-                           final FloatBuffer textureBuffer, final long timestamp) {
+    public int onDrawToFbo(final int textureId) {
         if (mFrameBuffers == null || mPboIds == null) {
             return OpenGlUtils.NO_TEXTURE;
         }
-        if (!mRecordEnabled || !mIsInitialized) {
+        if (/*!mRecordEnabled || */!mIsInitialized) {
             return OpenGlUtils.NOT_INIT;
         }
 
@@ -122,14 +122,14 @@ public class RecordFilter extends BaseFilter {
         GLES20.glUseProgram(mGLProgramId);
         runPendingOnDrawTasks();
 
-        cubeBuffer.position(0);
-        GLES20.glVertexAttribPointer(mGLAttributePosition, 2, GLES20.GL_FLOAT, false, 0, cubeBuffer);
+        mVertexBuffer.position(0);
+        GLES20.glVertexAttribPointer(mGLAttributePosition, 2, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
         GLES20.glEnableVertexAttribArray(mGLAttributePosition);
-        textureBuffer.position(0);
+        mFragmentBuffer.position(0);
         GLES20.glVertexAttribPointer(mGLAttributeTextureCoordinate, 2, GLES20.GL_FLOAT, false, 0,
-                textureBuffer);
+                mFragmentBuffer);
         GLES20.glEnableVertexAttribArray(mGLAttributeTextureCoordinate);
-        GLES20.glUniformMatrix4fv(mTextureTransformMatrixLocation, 1, false, mTextureTransformMatrix, 0);
+//        GLES20.glUniformMatrix4fv(mTextureTransformMatrixLocation, 1, false, mTextureTransformMatrix, 0);
 
         if (textureId != OpenGlUtils.NO_TEXTURE) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -144,7 +144,7 @@ public class RecordFilter extends BaseFilter {
         onDrawArraysAfter();
 
         bindPixelBuffer();
-        mLastTimestamp = timestamp;
+//        mLastTimestamp = timestamp;
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -154,7 +154,7 @@ public class RecordFilter extends BaseFilter {
 
     private void bindPixelBuffer() {
         GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, mPboIds.get(mPboIndex));
-//        MagicJni.glReadPixels(0, 0, mRowStride / mPixelStride, mInputHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE);
+        FFmpegBridge.glReadPixels(0, 0, mRowStride / mPixelStride, mInputHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE);
 
         if (mInitRecord) {//第一帧没有数据跳出
             unbindPixelBuffer();
@@ -166,7 +166,8 @@ public class RecordFilter extends BaseFilter {
 
         //glMapBufferRange会等待DMA传输完成，所以需要交替使用pbo
         ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, mPboSize, GLES30.GL_MAP_READ_BIT);
-
+//        byte[] bytes = new byte[mPboSize];
+//        byteBuffer.get(bytes);
         GLES30.glUnmapBuffer(GLES30.GL_PIXEL_PACK_BUFFER);
         unbindPixelBuffer();
 

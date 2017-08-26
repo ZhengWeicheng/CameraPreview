@@ -32,6 +32,8 @@ public:
 public:
     virtual void create(const char* vertex, const char* texture);
 
+    virtual void onPrepareToRender();
+
     virtual void onDrawArraysPre();
 
     virtual void onDrawArraysAfter();
@@ -46,12 +48,16 @@ public:
 
     virtual void drawFrame(GLenum target, GLuint texture);
 
+    virtual void setFrameSize(int width, int height);
+
     virtual bool isProgramAvailable();
+
+    void checkGlError(const char *op);
 
 private:
     GLuint createProgram(const char *pVertexSrc, const char *pFragmentSrc);
     GLuint loadShader(GLenum shaderType, const char *shaderSource);
-    void checkGlError(const char *op);
+
 protected:
     GLuint programId;
     GLuint posAttrVertices;

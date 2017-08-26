@@ -98,7 +98,14 @@ void createRenderHolder(JNIEnv *env, jobject jSurface, RenderHolder *holder) {
     // EGL attributes
     const EGLint confAttr[] =
             {
-                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,// very important!
+                    /**
+                    这个rendertype很重要
+                    0x0040 是大于等于opengl es 3 的rendertype EGLExt.EGL_OPENGL_ES3_BIT_KHR
+                    如果opegl版本大于等于3，但rendertype还是EGL_OPENGL_ES2_BIT，
+                     在使用gl3的接口时候，会各种错误
+                    加入opengl版本是gl2的话，这个EGL_RENDERABLE_TYPE需要赋值为EGL_OPENGL_ES2_BIT
+                     */
+                    EGL_RENDERABLE_TYPE, 0x0040,
                     EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,//EGL_WINDOW_BIT EGL_PBUFFER_BIT we will create a pixelbuffer surface
                     EGL_RED_SIZE, 8,
                     EGL_GREEN_SIZE, 8,

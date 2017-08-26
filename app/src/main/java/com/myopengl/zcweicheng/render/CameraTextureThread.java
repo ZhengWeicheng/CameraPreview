@@ -4,6 +4,7 @@ import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,11 +16,14 @@ import android.view.Surface;
 
 import com.myopengl.zcweicheng.MyApp;
 import com.myopengl.zcweicheng.Utils.AssetsUtils;
+import com.myopengl.zcweicheng.encode.RecordHelper;
 import com.myopengl.zcweicheng.gles.EglCore;
 import com.myopengl.zcweicheng.gles.FullFrameRect;
 import com.myopengl.zcweicheng.gles.Texture2dProgram;
 import com.myopengl.zcweicheng.gles.WindowSurface;
 import com.myopengl.zcweicheng.manager.CameraManager;
+
+import java.nio.ByteBuffer;
 
 /**
  * Created by zhengweicheng on 2017/8/7 0007.
@@ -211,5 +215,14 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private static native int nativeGetInputTex(long engine);
     private static native long nativeGetEglContext(long engine);
 
+    /**
+     * 底层回调
+     */
+    public static synchronized void notifyState() {
+//        ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, 720*1180, GLES30.GL_MAP_READ_BIT);
+//        byte[] bytes = new byte[720*1180];
+//        byteBuffer.get(bytes);
+        Log.d("aaa", "notifyState");
+    }
 }
 

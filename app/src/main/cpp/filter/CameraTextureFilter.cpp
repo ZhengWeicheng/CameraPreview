@@ -68,20 +68,19 @@ void CameraTextureFilter::setMatrix(jfloat *mverMatrix, jfloat *mTmpMatrix) {
 
 void CameraTextureFilter::initPixelBuffer(int width, int height) {
     if (mPixelBuffers != NULL && (frameWidth != width || frameHeight != height)) {
-        frameWidth = width;
-        frameHeight = height;
         destroyPixelBuffer();
     }
-
+    frameWidth = width;
+    frameHeight = height;
 
     if (mPixelBuffers != NULL) {
         return;
     }
 
     int align = 128;//128字节对齐
-    mRowStride = (width * 4 + (align - 1)) & ~(align - 1);
+//    mRowStride = (width * 4 + (align - 1)) & ~(align - 1);
 
-    mPboSize = mRowStride * height;
+    mPboSize = width * height;
 
     mPixelBuffers = new GLuint[2];
     glGenBuffers(2, mPixelBuffers);
@@ -104,8 +103,8 @@ void CameraTextureFilter::destroyPixelBuffer() {
 
 void CameraTextureFilter::bindPixelBuffer() {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, mPixelBuffers[mPboIndex]);
-    glReadPixels(0, 0, mRowStride / 4, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
+    glReadPixels(0, 0, frameWidth, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    checkGlError("glReadPixels");
     if (mInitRecord) {//第一帧没有数据跳出
         unbindPixelBuffer();
         mInitRecord = false;
@@ -117,7 +116,7 @@ void CameraTextureFilter::bindPixelBuffer() {
     //glMapBufferRange会等待DMA传输完成，所以需要交替使用pbo
     void* buffer = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, mPboSize, GL_MAP_READ_BIT);
     if (h264_encoder != NULL && buffer != NULL) {
-        h264_encoder->startSendOneFrame((uint8_t *) buffer);
+        h264_encoder->startSendOneFrame(buffer);
     }
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     unbindPixelBuffer();
@@ -131,6 +130,20 @@ void CameraTextureFilter::unbindPixelBuffer() {
     mPboIndex = (mPboIndex + 1) % 2;
     mPboNewIndex = (mPboNewIndex + 1) % 2;
 }
+
+void CameraTextureFilter::onPrepareToRender() {
+    glViewport(0, 0, frameWidth, frameHeight);
+}
+
+void CameraTextureFilter::setFrameSize(int width, int height) {
+    BaseFilter::setFrameSize(width, height);
+}
+
+
+
+
+
+
 
 
 

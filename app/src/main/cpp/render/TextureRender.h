@@ -15,6 +15,7 @@
 #include "../filter/CameraTextureFilter.h"
 #include "../encode/jx_yuv_encode_h264.h"
 #include "../encode/jx_pcm_encode_aac.h"
+#include "../filter/RecordFilter.h"
 
 class TextureRenderHolder : public RenderHolder {
 public:
@@ -22,6 +23,7 @@ public:
         RenderHolder();
         mCameraFilter = new CameraTextureFilter();
         mFilter = new BaseFilter();
+        mRecordFilter = new RecordFilter();
         textures = NULL;
 
     }
@@ -39,6 +41,8 @@ public:
     CameraTextureFilter* mCameraFilter;
 
     BaseFilter* mFilter;
+
+    RecordFilter* mRecordFilter;
 };
 
 

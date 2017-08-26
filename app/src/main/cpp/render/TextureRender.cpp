@@ -36,7 +36,7 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
 
     holder->mCameraFilter->initFramebuffer(width, height);
 
-    holder->mCameraFilter->initPixelBuffer(width, height);
+//    holder->mCameraFilter->initPixelBuffer(width, height);
 
     const char* baseVertex = getGLSLStr(mgr, "ext_vertex.glsl");
     const char* baseFragment = getGLSLStr(mgr, "ext_fragment.glsl");
@@ -45,6 +45,20 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
         delete holder;
         return 0;
     }
+    holder->mRecordFilter->create(baseVertex, baseFragment);
+    if (!holder->mRecordFilter->isProgramAvailable()) {
+        delete holder;
+        return 0;
+    }
+
+    holder->mRecordFilter->initFramebuffer(width, height);
+
+    holder->mRecordFilter->initPixelBuffer(width, height);
+
+    holder->mFilter->setFrameSize(width, height);
+    holder->mRecordFilter->setFrameSize(width, height);
+    holder->mCameraFilter->setFrameSize(width, height);
+
     holder->updatImageMethodId = getSurfaceUpdateImageMethodId(env);
 
     // Use tightly packed data
@@ -86,6 +100,10 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeRelease(JNIEnv *en
         delete holder->mFilter;
         holder->mFilter = NULL;
     }
+    if (holder->mRecordFilter != NULL) {
+        delete holder->mRecordFilter;
+        holder->mRecordFilter = NULL;
+    }
     delete holder;
 
 }
@@ -110,6 +128,8 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeDraw(JNIEnv *env, 
             holder->textures[0], mverMatrix, mTmpMatrix);
 
     holder->mFilter->drawFrame(GL_TEXTURE_2D, (GLuint) textureId);
+
+    holder->mRecordFilter->drawToFrameBuffer(GL_TEXTURE_2D, (GLuint) textureId);
 
     eglSwapBuffers(holder->eglDisplay, holder->eglSurface);
 
@@ -145,14 +165,14 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_stopRecord(JNIEnv *env, 
         return 0;
     }
     TextureRenderHolder *holder = (TextureRenderHolder*) engine;
-    holder->mCameraFilter->isEncode = false;
-    if (holder->mCameraFilter->h264_encoder != NULL) {
-        holder->mCameraFilter->h264_encoder->user_end();
+    holder->mRecordFilter->endRecord();
+    if (holder->mRecordFilter->h264_encoder != NULL) {
+        holder->mRecordFilter->h264_encoder->user_end();
     }
 
-    if (holder->mCameraFilter->aac_encoder != NULL) {
-        holder->mCameraFilter->aac_encoder->user_end();
-    }
+//    if (holder->mRecordFilter->aac_encoder != NULL) {
+//        holder->mRecordFilter->aac_encoder->user_end();
+//    }
     return 0;
 
 }
@@ -169,8 +189,9 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_startRecord(JNIEnv *env,
         return 0;
     }
     TextureRenderHolder *holder = (TextureRenderHolder*) engine;
-
-    jclass global_class = (jclass) env->NewGlobalRef(type);
+    jclass class1 = env->FindClass("com/myopengl/zcweicheng/render/CameraTextureThread");
+    jclass global_class = (jclass) env->NewGlobalRef(class1);
+    jmethodID pID = env->GetStaticMethodID(class1, "notifyState", "()V");
     UserArguments *arguments = (UserArguments *) malloc(sizeof(UserArguments));
     const char *media_base_path = env->GetStringUTFChars(mediaBasePath_, 0);
     const char *media_name = env->GetStringUTFChars(mediaName_, 0);
@@ -216,12 +237,13 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_startRecord(JNIEnv *env,
     arguments->env = env;
     arguments->java_class = global_class;
     arguments->env->GetJavaVM(&arguments->javaVM);
-    holder->mCameraFilter->h264_encoder = new JXYUVEncodeH264(arguments);
+    arguments->pID = pID;
+    holder->mRecordFilter->h264_encoder = new JXYUVEncodeH264(arguments);
 //    holder->aac_encoder = new JXPCMEncodeAAC(arguments);
-    int v_code = holder->mCameraFilter->h264_encoder->initVideoEncoder();
+    int v_code = holder->mRecordFilter->h264_encoder->initVideoEncoder();
 //    int a_code = holder->aac_encoder->initAudioEncoder();
     if (v_code == 0) {
-        holder->mCameraFilter->isEncode = true;
+        holder->mRecordFilter->startRecord();
         return 0;
     } else {
         return -1;

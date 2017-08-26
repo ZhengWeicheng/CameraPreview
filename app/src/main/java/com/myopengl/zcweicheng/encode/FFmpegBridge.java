@@ -140,4 +140,6 @@ public class FFmpegBridge {
     public interface FFmpegStateListener {
         void allRecordEnd();
     }
+
+    public static native void glReadPixels(int x, int y, int width, int height, int format, int type);
 }

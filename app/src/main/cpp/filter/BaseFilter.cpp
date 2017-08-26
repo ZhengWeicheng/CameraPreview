@@ -24,10 +24,10 @@ void BaseFilter::create(const char *vertex, const char *texture) {
 
 void BaseFilter::initFramebuffer(int width, int height) {
     if (mFrameBuffers != NULL && (frameWidth != width || frameHeight != height)) {
-        frameWidth = width;
-        frameHeight = height;
         destroyFrameBuffer();
     }
+    frameWidth = width;
+    frameHeight = height;
     if (mFrameBuffers != NULL) {
         return;
     }
@@ -75,6 +75,9 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture) {
 void BaseFilter::drawFrame(GLenum target, GLuint texture) {
 
     glUseProgram(programId);
+
+//    onPrepareToRender();
+
     //输入顶点
     glEnableVertexAttribArray(posAttrVertices);
     glVertexAttribPointer(posAttrVertices, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), VERTICES_RENDER);
@@ -89,11 +92,11 @@ void BaseFilter::drawFrame(GLenum target, GLuint texture) {
     onDrawArraysPre();
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDisableVertexAttribArray(posAttrVertices);
+    glDisableVertexAttribArray(posAttrTexCoords);
 
     onDrawArraysAfter();
 
-    glDisableVertexAttribArray(posAttrVertices);
-    glDisableVertexAttribArray(posAttrTexCoords);
     glBindTexture(target, 0);
 }
 
@@ -181,6 +184,19 @@ void BaseFilter::checkGlError(const char *op) {
         LOGE("after %s() glError (0x%x)\n", op, error);
     }
 }
+
+void BaseFilter::onPrepareToRender() {
+    glViewport(0, 0, frameWidth, frameHeight);
+}
+
+void BaseFilter::setFrameSize(int width, int height) {
+    this->frameWidth = width;
+    this->frameHeight = height;
+}
+
+
+
+
 
 
 

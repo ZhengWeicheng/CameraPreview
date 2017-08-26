@@ -20,7 +20,7 @@ public:
         mverMatrix = NULL;
         mTmpMatrix = NULL;
         isEncode = false;
-        mRowStride = 0;
+//        mRowStride = 0;
         mPboIndex = 0;
         mPboNewIndex = 0;
         mLastTimestamp = 0;//图像时间戳，用于录制帧数判断
@@ -70,10 +70,14 @@ public:
 
     void unbindPixelBuffer();
 
+    void setFrameSize(int width, int height);
+
 private:
     void onDrawArraysPre();
 
     void onDrawArraysAfter();
+
+    void onPrepareToRender();
 
 public:
     GLuint posDistance;
@@ -98,7 +102,7 @@ public:
     JXYUVEncodeH264 *h264_encoder;
     JXPCMEncodeAAC *aac_encoder;
 
-    int mRowStride;
+//    int mRowStride;
     int mPboIndex;
     int mPboNewIndex;
     int mPboSize;

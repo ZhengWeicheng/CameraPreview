@@ -23,7 +23,7 @@ public:
 
     static void* startEncode(void * obj);
 
-    int startSendOneFrame(uint8_t *buf);
+    int startSendOneFrame(void *buf);
 
     void user_end();
 
@@ -35,51 +35,33 @@ public:
                        int in_y_size,
                        int format);
     ~JXYUVEncodeH264() {
-        if (arguments != NULL) {
-            if (arguments->handler != NULL) {
-                delete(arguments->handler);
-                arguments->handler = NULL;
-            }
-            delete(arguments);
-            arguments = NULL;
+        if (pFormatCtx != NULL) {
+            av_write_trailer(pFormatCtx);
         }
         //Clean
         if (video_st != NULL) {
             avcodec_close(video_st->codec);
             av_free(pFrame);
-            delete(video_st);
-            delete(pFrame);
-            delete(pCodecCtx);
-            video_st = NULL;
-            pFrame = NULL;
-            pCodecCtx = NULL;
         }
         if (pFormatCtx != NULL) {
-            av_write_trailer(pFormatCtx);
             avio_close(pFormatCtx->pb);
             avformat_free_context(pFormatCtx);
-            delete(pFormatCtx);
-            delete(pFormatCtx->pb);
-            pFormatCtx = NULL;
-            pFormatCtx->pb = NULL;
         }
 
         if (swsContext != NULL) {
             sws_freeContext(swsContext);
-            swsContext = NULL;
         }
         if (pFrameYUV != NULL) {
             av_free(pFrameYUV);
-            delete(pFrameYUV);
-            pFrameYUV = NULL;
         }
     }
 
 private:
     int flush_encoder(AVFormatContext *fmt_ctx, unsigned int stream_index);
 
-private:
+public:
     UserArguments *arguments;
+private:
     int is_end = 0;
     int is_release = 0;
     threadsafe_queue<uint8_t *> frame_queue;
