@@ -145,6 +145,10 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             mInputTexture.release();
             mInputTexture = null;
         }
+        if (mOutputSurface != null) {
+            mOutputSurface.release();
+            mOutputSurface = null;
+        }
         nativeRelease(enginId);
         Log.d(TAG, "release");
     }
@@ -219,9 +223,9 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
      * 底层回调
      */
     public static synchronized void notifyState() {
-//        ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, 720*1180, GLES30.GL_MAP_READ_BIT);
-//        byte[] bytes = new byte[720*1180];
-//        byteBuffer.get(bytes);
+        ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, 720*1180, GLES30.GL_MAP_READ_BIT);
+        byte[] bytes = new byte[720*1180];
+        byteBuffer.get(bytes);
         Log.d("aaa", "notifyState");
     }
 }

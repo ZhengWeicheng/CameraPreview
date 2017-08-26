@@ -54,7 +54,7 @@ void RecordFilter::initPixelBuffer(int width, int height) {
     }
 
     int align = 128;//128字节对齐
-    //这个自己对齐很重要，如果没有字节对齐，效率上不会有任何的提升
+    //这个字节对齐很重要，如果没有字节对齐，效率上不会有任何的提升
     mRowStride = (width + (align - 1)) & ~(align - 1);
 
     mPboSize = mRowStride * height;
@@ -89,10 +89,10 @@ void RecordFilter::bindPixelBuffer() {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, mPixelBuffers[mPboNewIndex]);
 
     //glMapBufferRange会等待DMA传输完成，所以需要交替使用pbo
-    GLbyte * buffer = (GLbyte *) glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, mPboSize, GL_MAP_READ_BIT);
+//    GLbyte * buffer = (GLbyte *) glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, mPboSize, GL_MAP_READ_BIT);
 //    checkGlError("glMapBufferRange");
     if (isEncode) {
-//        end_notify();
+        end_notify();
     }
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     unbindPixelBuffer();

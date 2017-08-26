@@ -204,6 +204,7 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
         if(h264_encoder->is_release){
             //Write file trailer
             delete h264_encoder;
+            h264_encoder = NULL;
             return 0;
         }
         if (h264_encoder->frame_queue.empty()) {
@@ -255,6 +256,7 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
     if (h264_encoder->is_end) {
         h264_encoder->encodeEnd();
         delete h264_encoder;
+        h264_encoder = NULL;
     }
     return 0;
 }

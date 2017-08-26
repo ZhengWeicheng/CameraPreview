@@ -34,22 +34,26 @@ public:
     void custom_filter(const JXYUVEncodeH264 *h264_encoder, const uint8_t *picture_buf,
                        int in_y_size,
                        int format);
+
     ~JXYUVEncodeH264() {
-        if (pFormatCtx != NULL) {
-            av_write_trailer(pFormatCtx);
-        }
+
         //Clean
         if (video_st != NULL) {
             avcodec_close(video_st->codec);
             av_free(pFrame);
+            video_st = NULL;
+            pFrame = NULL;
         }
         if (pFormatCtx != NULL) {
+            av_write_trailer(pFormatCtx);
             avio_close(pFormatCtx->pb);
             avformat_free_context(pFormatCtx);
+            pFormatCtx = NULL;
         }
 
         if (swsContext != NULL) {
             sws_freeContext(swsContext);
+            swsContext = NULL;
         }
         if (pFrameYUV != NULL) {
             av_free(pFrameYUV);

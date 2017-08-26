@@ -32,10 +32,6 @@ public:
         if (mPixelBuffers != NULL) {
             destroyPixelBuffer();
         }
-        if (h264_encoder != NULL) {
-            delete(h264_encoder);
-            h264_encoder = NULL;
-        }
     }
 
      void create(const char* vertex, const char* texture);

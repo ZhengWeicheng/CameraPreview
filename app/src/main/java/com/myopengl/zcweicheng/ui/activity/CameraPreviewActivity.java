@@ -100,7 +100,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
         if (mRender != null) {
             mRender.release();
         }
-        return true;
+        return false;
     }
 
     @Override
