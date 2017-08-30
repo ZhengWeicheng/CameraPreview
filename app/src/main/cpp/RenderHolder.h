@@ -21,7 +21,6 @@ public:
         if (eglDisplay != EGL_NO_DISPLAY) {
             eglDestroySurface(eglDisplay, eglSurface);
             eglDestroyContext(eglDisplay, eglContext);
-//            eglReleaseThread();
             eglTerminate(eglDisplay);
         }
 

@@ -42,18 +42,6 @@ void CameraTextureFilter::onDrawArraysAfter() {
     }
 }
 
-bool CameraTextureFilter::isProgramAvailable() {
-    return BaseFilter::isProgramAvailable();
-}
-
-void CameraTextureFilter::drawFrame(GLenum target, GLuint texture) {
-    BaseFilter::drawFrame(target, texture);
-}
-
-void CameraTextureFilter::initFramebuffer(int width, int height) {
-    BaseFilter::initFramebuffer(width, height);
-}
-
 int CameraTextureFilter::drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix,
                                            jfloat *mTmpMatrix) {
     this->mverMatrix = mverMatrix;

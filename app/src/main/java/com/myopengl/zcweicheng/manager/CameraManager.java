@@ -113,7 +113,7 @@ public class CameraManager {
         public CameraThread() {
             super("camera thread");
             start();
-            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+            mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
             mHandler = new Handler(Looper.myLooper(), this);
         }
 

@@ -224,8 +224,8 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
      */
     public static synchronized void notifyState() {
         ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, 720*1180, GLES30.GL_MAP_READ_BIT);
-        byte[] bytes = new byte[720*1180];
-        byteBuffer.get(bytes);
+//        byte[] bytes = new byte[720*1180];
+//        byteBuffer.get(bytes);
         Log.d("aaa", "notifyState");
     }
 }

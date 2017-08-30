@@ -8,7 +8,7 @@
 #include "../encode/jx_yuv_encode_h264.h"
 #include "../encode/jx_pcm_encode_aac.h"
 
-class CameraTextureFilter : BaseFilter {
+class CameraTextureFilter : public BaseFilter {
 
 public:
     CameraTextureFilter() {
@@ -50,17 +50,11 @@ public:
 public:
     virtual void create(const char* vertex, const char* texture);
 
-    virtual void initFramebuffer(int width, int height);
-
     virtual int drawToFrameBuffer(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
-
-    virtual void drawFrame(GLenum target, GLuint texture);
 
     void setDistanceAndNextFilter(float distance, float nextFilter);
 
     void setMatrix(jfloat * mverMatrix, jfloat * mTmpMatrix);
-
-    bool isProgramAvailable();
 
     void initPixelBuffer(int width, int height);
 
