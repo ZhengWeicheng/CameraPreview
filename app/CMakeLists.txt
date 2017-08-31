@@ -10,38 +10,38 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-             native-lib
+                native-lib
 
-             # Sets the library as a shared library.
-             SHARED
+                # Sets the library as a shared library.
+                SHARED
 
-             # Provides a relative path to your source file(s).
-             # Associated headers in the same location as their source
-             # file are automatically included.
-             #utils
-             src/main/cpp/utils/GLUtil.cpp
-             src/main/cpp/utils/JNIUtils.cpp
-             #render
-             src/main/cpp/render/DataRender.cpp
-             src/main/cpp/render/TextureRender.cpp
-             #filter
-             src/main/cpp/filter/BaseFilter.cpp
-             src/main/cpp/filter/CameraTextureFilter.cpp
-             src/main/cpp/filter/RecordFilter.cpp
-
-                           src/main/cpp/encode/jx_yuv_encode_h264.cpp
-                           src/main/cpp/encode/jx_pcm_encode_aac.cpp
-                           src/main/cpp/encode/jx_media_muxer.cpp
-                           src/main/cpp/encode/jx_jni_handler.cpp
-                           src/main/cpp/encode/jx_ffmpeg_jni.cpp
-                           src/main/cpp/encode/threadsafe_queue.cpp
-                           src/main/cpp/encode/jx_log.cpp
-                           src/main/cpp/encode/cmdutils.c
-                           src/main/cpp/encode/ffmpeg.c
-                           src/main/cpp/encode/ffmpeg_filter.c
-                           src/main/cpp/encode/ffmpeg_opt.c
-                           src/main/cpp/encode/jx_ffmpeg_cmd_run.c
-                           src/main/cpp/encode/jx_ffmpeg_config.cpp
+                # Provides a relative path to your source file(s).
+                # Associated headers in the same location as their source
+                # file are automatically included.
+                #============utils=================
+                src/main/cpp/utils/GLUtil.cpp
+                src/main/cpp/utils/JNIUtils.cpp
+                #============render=================
+                src/main/cpp/render/DataRender.cpp
+                src/main/cpp/render/TextureRender.cpp
+                #============filter=================
+                src/main/cpp/filter/BaseFilter.cpp
+                src/main/cpp/filter/CameraTextureFilter.cpp
+                src/main/cpp/filter/RecordFilter.cpp
+                #==============encoder==================
+                src/main/cpp/encode/jx_yuv_encode_h264.cpp
+                src/main/cpp/encode/jx_pcm_encode_aac.cpp
+                src/main/cpp/encode/jx_media_muxer.cpp
+                src/main/cpp/encode/jx_jni_handler.cpp
+                src/main/cpp/encode/jx_ffmpeg_jni.cpp
+                src/main/cpp/encode/threadsafe_queue.cpp
+                src/main/cpp/encode/jx_log.cpp
+                src/main/cpp/encode/cmdutils.c
+                src/main/cpp/encode/ffmpeg.c
+                src/main/cpp/encode/ffmpeg_filter.c
+                src/main/cpp/encode/ffmpeg_opt.c
+                src/main/cpp/encode/jx_ffmpeg_cmd_run.c
+                src/main/cpp/encode/jx_ffmpeg_config.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -141,6 +141,24 @@ include_directories(
  ${CMAKE_SOURCE_DIR}/src/main/cpp/encode/include/
  )
 
+#===================================lib yuv =======================================
+ add_library(
+             libYUV
+             SHARED
+             IMPORTED
+             )
+
+set_target_properties(
+         libYUV
+         PROPERTIES IMPORTED_LOCATION
+          ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libyuv.so
+          )
+
+include_directories(
+${CMAKE_SOURCE_DIR}/src/main/cpp/libyuv/include/
+)
+#===================================lib yuv =======================================
+
 find_library( # Sets the name of the path variable.
               log-lib
 
@@ -165,5 +183,5 @@ target_link_libraries( # Specifies the target library.
                        avutil
                        swresample
                        swscale
-
+                       libYUV
                        )

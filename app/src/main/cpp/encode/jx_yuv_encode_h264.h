@@ -31,10 +31,6 @@ public:
 
     int encodeEnd();
 
-    void custom_filter(const JXYUVEncodeH264 *h264_encoder, const uint8_t *picture_buf,
-                       int in_y_size,
-                       int format);
-
     ~JXYUVEncodeH264() {
 
         //Clean
@@ -55,8 +51,9 @@ public:
             sws_freeContext(swsContext);
             swsContext = NULL;
         }
-        if (pFrameYUV != NULL) {
-            av_free(pFrameYUV);
+        if (pFrameRGBA != NULL) {
+            av_free(pFrameRGBA);
+            pFrameRGBA = NULL;
         }
     }
 
@@ -81,7 +78,7 @@ private:
     int framecnt = 0;
     int frame_count = 0;
     SwsContext* swsContext;
-    AVFrame *pFrameYUV;
+    AVFrame *pFrameRGBA;
 
 
 };

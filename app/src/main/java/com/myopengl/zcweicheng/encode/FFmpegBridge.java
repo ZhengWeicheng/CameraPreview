@@ -1,5 +1,9 @@
 package com.myopengl.zcweicheng.encode;
 
+import android.opengl.GLES30;
+import android.util.Log;
+
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class FFmpegBridge {

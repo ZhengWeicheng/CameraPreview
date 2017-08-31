@@ -97,11 +97,11 @@ Java_com_myopengl_zcweicheng_encode_FFmpegBridge_prepareJXFFmpegEncoder(JNIEnv *
     arguments->java_class = global_class;
     arguments->env->GetJavaVM(&arguments->javaVM);
     h264_encoder = new JXYUVEncodeH264(arguments);
-    aac_encoder = new JXPCMEncodeAAC(arguments);
+//    aac_encoder = new JXPCMEncodeAAC(arguments);
     int v_code = h264_encoder->initVideoEncoder();
-    int a_code = aac_encoder->initAudioEncoder();
+//    int a_code = aac_encoder->initAudioEncoder();
 
-    if (v_code == 0 && a_code == 0) {
+    if (v_code == 0) {
         return 0;
     } else {
         return -1;

@@ -1,6 +1,7 @@
 package com.myopengl.zcweicheng.ui.activity;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Environment;
@@ -8,12 +9,15 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import com.myopengl.zcweicheng.R;
+import com.myopengl.zcweicheng.encode.RecordHelper;
 import com.myopengl.zcweicheng.manager.CameraManager;
 import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
 import com.myopengl.zcweicheng.render.CameraTextureRender;
 import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
+import com.myopengl.zcweicheng.render.CameraTextureThread;
 import com.myopengl.zcweicheng.ui.TextureTouchListener;
 import com.myopengl.zcweicheng.ui.TextureTouchListener.onTextureTouchListener;
 
@@ -33,6 +37,13 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_preview);
+        final ImageView imageView = (ImageView) findViewById(R.id.pb_result);
+//        CameraTextureThread.recordHelper.setOnRecordListener(new RecordHelper.OnRecordListener() {
+//            @Override
+//            public void onRecord(Bitmap bitmap) {
+//                imageView.setImageBitmap(bitmap);
+//            }
+//        });
         final Button button = (Button) findViewById(R.id.record_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override

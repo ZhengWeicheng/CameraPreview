@@ -4,7 +4,6 @@
 
 
 #include "RecordFilter.h"
-
 void RecordFilter::create(const char *vertex, const char *texture) {
     BaseFilter::create(vertex, texture);
 }
@@ -53,10 +52,10 @@ void RecordFilter::initPixelBuffer(int width, int height) {
         return;
     }
 
-    int align = 128;//128字节对齐
+    int align = 4;//128字节对齐
     //这个字节对齐很重要，如果没有字节对齐，效率上不会有任何的提升
-    mRowStride = (width + (align - 1)) & ~(align - 1);
-
+//    mRowStride = (width*4 + (align - 1)) & ~(align - 1);
+    mRowStride = (width*4 + (align - 1)) & ~(align - 1);
     mPboSize = mRowStride * height;
 
     glGenBuffers(2, mPixelBuffers);
@@ -79,7 +78,7 @@ void RecordFilter::bindPixelBuffer() {
         return;
     }
     glBindBuffer(GL_PIXEL_PACK_BUFFER, mPixelBuffers[mPboIndex]);
-    glReadPixels(0, 0, mRowStride/2, frameHeight/2, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glReadPixels(0, 0, mRowStride / 4, frameHeight, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     if (mInitRecord) {//第一帧没有数据跳出
         unbindPixelBuffer();
         mInitRecord = false;
@@ -90,13 +89,12 @@ void RecordFilter::bindPixelBuffer() {
 
     //glMapBufferRange会等待DMA传输完成，所以需要交替使用pbo
 //    GLbyte * buffer = (GLbyte *) glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, mPboSize, GL_MAP_READ_BIT);
-//    checkGlError("glMapBufferRange");
     if (isEncode) {
         end_notify();
+//        JXYUVEncodeH264::startSendOneFrame(buffer);
     }
     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     unbindPixelBuffer();
-//    glViewport(0, 0, frameWidth, frameHeight);
 
 }
 
@@ -109,19 +107,15 @@ void RecordFilter::unbindPixelBuffer() {
 }
 
 void RecordFilter::end_notify() {
-    if (h264_encoder == NULL) {
-        return;
-    }
     try {
-        UserArguments *arguments = h264_encoder->arguments;
-        arguments->env->CallStaticVoidMethod(arguments->java_class, arguments->pID);
+        env->CallStaticVoidMethod(java_class, pID, mPboSize);
     }
     catch (exception e) {
     }
 }
 
 void RecordFilter::onPrepareToRender() {
-    glViewport(0, 0, frameWidth/2, frameHeight/2);
+    glViewport(0, 0, frameWidth, frameHeight);
 }
 
 void RecordFilter::setFrameSize(int width, int height) {

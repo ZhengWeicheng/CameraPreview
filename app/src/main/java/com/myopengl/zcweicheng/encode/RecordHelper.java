@@ -28,6 +28,7 @@ public class RecordHelper extends Handler {
 
     private List<PixelBuffer> mBuffers;
     private Thread mThread;
+    private OnRecordListener mOnRecordListener;
 
 
     public RecordHelper() {
@@ -42,8 +43,14 @@ public class RecordHelper extends Handler {
         super.handleMessage(msg);
         switch (msg.what) {
             case PREVIEW_BITMAP:
+                if (mOnRecordListener != null)
+                    mOnRecordListener.onRecord((Bitmap) msg.obj);
                 break;
         }
+    }
+
+    public void setOnRecordListener(OnRecordListener l) {
+        this.mOnRecordListener = l;
     }
 
 
@@ -78,6 +85,8 @@ public class RecordHelper extends Handler {
             e.printStackTrace();
         }
         mThread = null;
+        mReusableBuffers.clear();
+        mBuffers.clear();
     }
 
     private class MyThread extends Thread {//转换成Bitmap演示用效率低下，可以用libyuv代替
@@ -135,5 +144,9 @@ public class RecordHelper extends Handler {
         } else {
             return mReusableBuffers.remove(0);
         }
+    }
+
+    public interface OnRecordListener {
+        void onRecord(Bitmap bitmap);
     }
 }

@@ -3,7 +3,6 @@ package com.myopengl.zcweicheng.render;
 import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.os.Environment;
@@ -11,16 +10,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Surface;
 
 import com.myopengl.zcweicheng.MyApp;
 import com.myopengl.zcweicheng.Utils.AssetsUtils;
-import com.myopengl.zcweicheng.encode.RecordHelper;
-import com.myopengl.zcweicheng.gles.EglCore;
-import com.myopengl.zcweicheng.gles.FullFrameRect;
-import com.myopengl.zcweicheng.gles.Texture2dProgram;
-import com.myopengl.zcweicheng.gles.WindowSurface;
+import com.myopengl.zcweicheng.encode.EncodeHelper;
+import com.myopengl.zcweicheng.encode.FFmpegBridge;
 import com.myopengl.zcweicheng.manager.CameraManager;
 
 import java.nio.ByteBuffer;
@@ -39,7 +36,6 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     static final int MSG_SET_CAMERA_SIZE = 4;
     static final int MSG_SET_DISTANCE = 5;
     static final int MSG_SET_FILTER_ID = 6;
-
     private Handler mHandler;
     private Surface mOutputSurface;
     private int mWidth;
@@ -63,6 +59,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private float mDistance;
     private float mFilterId;
     private long enginId;
+    private boolean exit;
 
     public CameraTextureThread() {
         super("VideoTextureRenderThread");
@@ -116,7 +113,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             Log.d("aaaaaaa","初始化出错啦");
             return;
         }
-
+        exit = false;
         mTextureId = nativeGetInputTex(enginId);
         mInputTexture = new SurfaceTexture(mTextureId);
         mInputTexture.setOnFrameAvailableListener(this);
@@ -141,6 +138,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private void release() {
         mListener = null;
         isScale = false;
+        exit = true;
         if (mInputTexture != null) {
             mInputTexture.release();
             mInputTexture = null;
@@ -156,7 +154,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        if (enginId == 0 || mInputTexture == null) {
+        if (enginId == 0 || mInputTexture == null || exit) {
             Log.d(TAG, "Skipping drawFrame after shutdown");
             return;
         }
@@ -166,7 +164,11 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
         }
         nativeDraw(surfaceTexture, mverMatrix, mTmpMatrix, mDistance, mFilterId, enginId);
-        mFrameNum++;
+        long spend = SystemClock.elapsedRealtime() - mFrameUpdateTime;
+        if (spend < FRAME_THRESHOLD) {
+            SystemClock.sleep(FRAME_THRESHOLD - spend);
+        }
+        mFrameUpdateTime = SystemClock.elapsedRealtime();
     }
 
     public void startEncode() {
@@ -174,8 +176,11 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             Log.d(TAG, "START ENCODE ERROR");
             return;
         }
+        FFmpegBridge.prepareJXFFmpegEncoder(Environment.getExternalStorageDirectory().getAbsolutePath(),
+                String.valueOf(System.currentTimeMillis()), 0, 544, 960, 544, 960, 25, 500000);
         startRecord(enginId, Environment.getExternalStorageDirectory().getAbsolutePath(),
-                String.valueOf(System.currentTimeMillis()), 0, mWidth, mHeight, mWidth, mHeight, 20, 1000000);
+                String.valueOf(System.currentTimeMillis()), 0, 544, 960, 544, 960, 20, 500000);
+        encodeHelper.start();
     }
 
     public void stopEncode() {
@@ -184,6 +189,8 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
             return;
         }
         stopRecord(enginId);
+        FFmpegBridge.recordEnd();
+        encodeHelper.stop();
     }
 
 //    private static native long nativeInit(Surface surface, String vertex, String fragment);
@@ -227,6 +234,37 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 //        byte[] bytes = new byte[720*1180];
 //        byteBuffer.get(bytes);
         Log.d("aaa", "notifyState");
+    }
+
+    public static EncodeHelper encodeHelper = new EncodeHelper();
+    public static final int FRAME_RATE = 25;
+    public static final int FRAME_THRESHOLD = 1000/FRAME_RATE;
+    private static long mFrameUpdateTime;
+    public static synchronized void onFrameAvailable(int size) {
+        ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, size, GLES30.GL_MAP_READ_BIT);
+        encodeHelper.onRecord(byteBuffer, size);
+
+//        if (count == 20) {
+//            BufferedOutputStream bos = null;
+//            try {
+//                String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/"
+//                        + String.valueOf(System.currentTimeMillis()) + ".png";
+//                File file = new File(filePath);
+//                if(!file.exists()) {
+//                    file.createNewFile();
+//                }
+//                bos = new BufferedOutputStream(new FileOutputStream(file));
+//                Bitmap bmp = Bitmap.createBitmap(544, 960, Bitmap.Config.ARGB_8888);
+//                bmp.copyPixelsFromBuffer(byteBuffer);
+//                bmp.compress(Bitmap.CompressFormat.PNG, 90, bos);
+//                bmp.recycle();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            } finally {
+//                if (bos != null) bos.close();
+//            }
+//        }
+        Log.d("aaa", "onFrameAvailable");
     }
 }
 

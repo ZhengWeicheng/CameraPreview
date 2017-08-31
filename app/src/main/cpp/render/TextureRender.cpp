@@ -51,12 +51,12 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
         return 0;
     }
 
-    holder->mRecordFilter->initFramebuffer(width, height);
+    holder->mRecordFilter->initFramebuffer(544, 960);
 
-    holder->mRecordFilter->initPixelBuffer(width, height);
+    holder->mRecordFilter->initPixelBuffer(544, 960);
 
     holder->mFilter->setFrameSize(width, height);
-    holder->mRecordFilter->setFrameSize(width, height);
+    holder->mRecordFilter->setFrameSize(544, 960);
     holder->mCameraFilter->setFrameSize(width, height);
 
     holder->updatImageMethodId = getSurfaceUpdateImageMethodId(env);
@@ -166,9 +166,6 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_stopRecord(JNIEnv *env, 
     }
     TextureRenderHolder *holder = (TextureRenderHolder*) engine;
     holder->mRecordFilter->endRecord();
-    if (holder->mRecordFilter->h264_encoder != NULL) {
-        holder->mRecordFilter->h264_encoder->user_end();
-    }
 
 //    if (holder->mRecordFilter->aac_encoder != NULL) {
 //        holder->mRecordFilter->aac_encoder->user_end();
@@ -190,62 +187,13 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_startRecord(JNIEnv *env,
     }
     TextureRenderHolder *holder = (TextureRenderHolder*) engine;
     jclass class1 = env->FindClass("com/myopengl/zcweicheng/render/CameraTextureThread");
-    jclass global_class = (jclass) env->NewGlobalRef(class1);
-    jmethodID pID = env->GetStaticMethodID(class1, "notifyState", "()V");
-    UserArguments *arguments = (UserArguments *) malloc(sizeof(UserArguments));
-    const char *media_base_path = env->GetStringUTFChars(mediaBasePath_, 0);
-    const char *media_name = env->GetStringUTFChars(mediaName_, 0);
-    JXJNIHandler *jni_handler = new JXJNIHandler();
-    jni_handler->setup_audio_state(START_STATE);
-    jni_handler->setup_video_state(START_STATE);
-    arguments->media_base_path = media_base_path;
-    arguments->media_name = media_name;
+    jmethodID pID = env->GetStaticMethodID(class1, "onFrameAvailable", "(I)V");
+    jclass global_class = (jclass) env->NewGlobalRef(type);
+    holder->mRecordFilter->startRecord();
+    holder->mRecordFilter->pID = pID;
+    holder->mRecordFilter->env = env;
+    holder->mRecordFilter->java_class = global_class;
+    env->GetJavaVM(&(holder->mRecordFilter->javaVM));
+    return 0;
 
-    size_t v_path_size = strlen(media_base_path) + strlen(media_name) + strlen(VIDEO_FORMAT) + 1;
-    arguments->video_path = (char *) malloc(v_path_size + 1);
-
-    size_t a_path_size = strlen(media_base_path) + strlen(media_name) + strlen(AUDIO_FORMAT) + 1;
-    arguments->audio_path = (char *) malloc(a_path_size + 1);
-
-    size_t m_path_size = strlen(media_base_path) + strlen(media_name) + strlen(MEDIA_FORMAT) + 1;
-    arguments->media_path = (char *) malloc(m_path_size + 1);
-
-    strcpy(arguments->video_path, media_base_path);
-    strcat(arguments->video_path, "/");
-    strcat(arguments->video_path, media_name);
-    strcat(arguments->video_path, VIDEO_FORMAT);
-
-    strcpy(arguments->audio_path, media_base_path);
-    strcat(arguments->audio_path, "/");
-    strcat(arguments->audio_path, media_name);
-    strcat(arguments->audio_path, AUDIO_FORMAT);
-
-    strcpy(arguments->media_path, media_base_path);
-    strcat(arguments->media_path, "/");
-    strcat(arguments->media_path, media_name);
-    strcat(arguments->media_path, MEDIA_FORMAT);
-
-    arguments->video_bit_rate = bit_rate;
-    arguments->frame_rate = frameRate;
-    arguments->audio_bit_rate = 40000;
-    arguments->audio_sample_rate = 44100;
-    arguments->in_width = in_width;
-    arguments->in_height = in_height;
-    arguments->out_height = out_height;
-    arguments->out_width = out_width;
-    arguments->handler = jni_handler;
-    arguments->env = env;
-    arguments->java_class = global_class;
-    arguments->env->GetJavaVM(&arguments->javaVM);
-    arguments->pID = pID;
-    holder->mRecordFilter->h264_encoder = new JXYUVEncodeH264(arguments);
-//    holder->aac_encoder = new JXPCMEncodeAAC(arguments);
-    int v_code = holder->mRecordFilter->h264_encoder->initVideoEncoder();
-//    int a_code = holder->aac_encoder->initAudioEncoder();
-    if (v_code == 0) {
-        holder->mRecordFilter->startRecord();
-        return 0;
-    } else {
-        return -1;
-    }
 }

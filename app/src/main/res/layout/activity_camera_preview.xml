@@ -8,6 +8,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <ImageView
+        android:id="@+id/pb_result"
+        android:layout_width="100dp"
+        android:layout_height="200dp" />
     <Button
         android:id="@+id/record_button"
         android:layout_width="match_parent"

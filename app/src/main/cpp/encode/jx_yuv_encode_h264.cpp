@@ -7,10 +7,16 @@
 #include "jx_yuv_encode_h264.h"
 #include "jx_jni_handler.h"
 #include "jx_log.h"
+#include "../libyuv/include/libyuv.h"
 #include <pthread.h>
 
-JXYUVEncodeH264::JXYUVEncodeH264(UserArguments *arg) : arguments(arg) {
 
+JXYUVEncodeH264::JXYUVEncodeH264(UserArguments *arg) : arguments(arg) {
+    video_st = NULL;
+    pFrame = NULL;
+    pFormatCtx = NULL;
+    swsContext = NULL;
+    pFrameRGBA = NULL;
 }
 
 /**
@@ -150,17 +156,17 @@ int JXYUVEncodeH264::initVideoEncoder() {
     avpicture_fill((AVPicture *) pFrame, buf, pCodecCtx->pix_fmt, pCodecCtx->width,
                    pCodecCtx->height);
 
-    swsContext = sws_alloc_context();
+//    swsContext = sws_alloc_context();
+//
+//    swsContext = sws_getContext(pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGBA,
+//          pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
 
-    swsContext = sws_getContext(pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGBA,
-          pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
-
-    pFrameYUV= av_frame_alloc();
+    pFrameRGBA= av_frame_alloc();
     int len = avpicture_get_size(AV_PIX_FMT_RGBA, pCodecCtx->width, pCodecCtx->height);
 
     uint8_t * out_buffer = (uint8_t *)av_malloc(len);
 
-    avpicture_fill((AVPicture *)pFrameYUV, out_buffer, AV_PIX_FMT_RGBA, pCodecCtx->width, pCodecCtx->height);
+    avpicture_fill((AVPicture *)pFrameRGBA, out_buffer, AV_PIX_FMT_RGBA, pCodecCtx->width, pCodecCtx->height);
 
     //Write File Header
     avformat_write_header(pFormatCtx, NULL);
@@ -212,27 +218,18 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
         }
         uint8_t *picture_buf = *h264_encoder->frame_queue.wait_and_pop().get();
         LOGI(JNI_DEBUG, "send_videoframe_count:%d", h264_encoder->frame_count);
-//        int in_y_size = h264_encoder->arguments->in_width * h264_encoder->arguments->in_height;
 
-        h264_encoder->pFrameYUV->data[0] = picture_buf;
-        h264_encoder->pFrameYUV->data[1] = picture_buf + h264_encoder->out_y_size;
-        h264_encoder->pFrameYUV->data[2] = picture_buf + h264_encoder->out_y_size * 2;
-        h264_encoder->pFrameYUV->data[3] = picture_buf + h264_encoder->out_y_size * 3;
-//        memcpy(h264_encoder->pFrameYUV->data[0],picture_buf,h264_encoder->out_y_size);
-//        memcpy(h264_encoder->pFrameYUV->data[1],picture_buf+h264_encoder->out_y_size,h264_encoder->out_y_size* 2);
-//        memcpy(h264_encoder->pFrameYUV->data[2],picture_buf+h264_encoder->out_y_size * 2,h264_encoder->out_y_size* 3);
-//        memcpy(h264_encoder->pFrameYUV->data[3],picture_buf+h264_encoder->out_y_size* 3,h264_encoder->out_y_size* 4);
+        LOGI(JNI_DEBUG, "start RGBAToI420");
 
-        sws_scale(h264_encoder->swsContext, (const uint8_t* const*)h264_encoder->pFrameYUV,
-                  h264_encoder->pFrameYUV->linesize, 0, h264_encoder->arguments->in_height,
-                  h264_encoder->pFrame->data, h264_encoder->pFrame->linesize);
+        int result = libyuv::ARGBToI420(picture_buf, h264_encoder->arguments->in_width*4,
+                   h264_encoder->pFrame->data[0], h264_encoder->arguments->in_width,
+                   h264_encoder->pFrame->data[2], h264_encoder->arguments->in_width/2,
+                   h264_encoder->pFrame->data[1], h264_encoder->arguments->in_width/2,
+                   h264_encoder->arguments->in_width,
+                   h264_encoder->arguments->in_height);
+        LOGI(JNI_DEBUG, "end RGBAToI420 result = %d", result);
+        delete (picture_buf);
 
-//        h264_encoder->custom_filter(h264_encoder, picture_buf, in_y_size,
-//                                    h264_encoder->arguments->v_custom_format);
-
-//    memcpy(h264_encoder->pFrame->data[0],picture_buf,h264_encoder->out_y_size);
-//    memcpy(h264_encoder->pFrame->data[2],picture_buf+h264_encoder->out_y_size,h264_encoder->out_y_size/4);
-//    memcpy(h264_encoder->pFrame->data[1],picture_buf+h264_encoder->out_y_size*5/4,h264_encoder->out_y_size/4);
         //PTS
         h264_encoder->pFrame->pts = h264_encoder->frame_count;
         h264_encoder->frame_count++;
@@ -251,7 +248,6 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
             ret = av_write_frame(h264_encoder->pFormatCtx, &h264_encoder->pkt);
             av_free_packet(&h264_encoder->pkt);
         }
-        delete (picture_buf);
     }
     if (h264_encoder->is_end) {
         h264_encoder->encodeEnd();
@@ -259,112 +255,6 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
         h264_encoder = NULL;
     }
     return 0;
-}
-/**
- * 对视频做一些处理
- * @param h264_encoder
- * @param picture_buf
- * @param in_y_size
- * @param format
- */
-void
-JXYUVEncodeH264::custom_filter(const JXYUVEncodeH264 *h264_encoder, const uint8_t *picture_buf,
-                               int in_y_size, int format) {
-
-
-
-    //   y值在H方向开始行
-    int y_height_start_index=h264_encoder->arguments->in_height-h264_encoder->arguments->out_height;
-    //   uv值在H方向开始行
-    int uv_height_start_index=y_height_start_index/2;
-
-    if (format == ROTATE_90_CROP_LT) {
-
-        for (int i = y_height_start_index; i < h264_encoder->arguments->in_height; i++) {
-
-            for (int j = 0; j < h264_encoder->arguments->out_width; j++) {
-
-                int index = h264_encoder->arguments->in_width * i + j;
-                uint8_t value = *(picture_buf + index);
-                *(h264_encoder->pFrame->data[0] + j * h264_encoder->arguments->out_height +
-                  (h264_encoder->arguments->out_height - (i-y_height_start_index) - 1)) = value;
-            }
-        }
-
-        for (int i = uv_height_start_index; i < h264_encoder->arguments->in_height / 2; i++) {
-            for (int j = 0; j < h264_encoder->arguments->out_width / 2; j++) {
-                int index = h264_encoder->arguments->in_width / 2 * i + j;
-                uint8_t v = *(picture_buf + in_y_size + index);
-                uint8_t u = *(picture_buf + in_y_size * 5 / 4 + index);
-                *(h264_encoder->pFrame->data[2] + (j * h264_encoder->arguments->out_height / 2 +
-                                                   (h264_encoder->arguments->out_height / 2 - (i-uv_height_start_index) -
-                                                    1))) = v;
-                *(h264_encoder->pFrame->data[1] + (j * h264_encoder->arguments->out_height / 2 +
-                                                   (h264_encoder->arguments->out_height / 2 - (i-uv_height_start_index) -
-                                                    1))) = u;
-            }
-        }
-    } else if (format == ROTATE_0_CROP_LT) {
-
-
-
-
-        for (int i = y_height_start_index; i < h264_encoder->arguments->in_height; i++) {
-
-            for (int j = 0; j < h264_encoder->arguments->out_width; j++) {
-
-                int index = h264_encoder->arguments->in_width * i + j;
-                uint8_t value = *(picture_buf + index);
-
-                *(h264_encoder->pFrame->data[0] + (i-y_height_start_index) * h264_encoder->arguments->out_width +
-                  j) = value;
-            }
-        }
-
-
-        for (int i = uv_height_start_index; i < h264_encoder->arguments->in_height / 2; i++) {
-            for (int j = 0; j < h264_encoder->arguments->out_width / 2; j++) {
-
-                int index = h264_encoder->arguments->in_width / 2 * i + j;
-                uint8_t v = *(picture_buf + in_y_size + index);
-
-                uint8_t u = *(picture_buf + in_y_size * 5 / 4 + index);
-                *(h264_encoder->pFrame->data[2] +
-                  ((i-uv_height_start_index) * h264_encoder->arguments->out_width / 2 + j)) = v;
-                *(h264_encoder->pFrame->data[1] +
-                  ((i-uv_height_start_index) * h264_encoder->arguments->out_width / 2 + j)) = u;
-            }
-        }
-    } else if (format == ROTATE_270_CROP_LT_MIRROR_LR) {
-
-        int y_width_start_index=h264_encoder->arguments->in_width-h264_encoder->arguments->out_width;
-        int uv_width_start_index=y_width_start_index/2;
-
-        for (int i = 0; i < h264_encoder->arguments->out_height; i++) {
-
-            for (int j = y_width_start_index; j < h264_encoder->arguments->in_width; j++) {
-
-                int index = h264_encoder->arguments->in_width * (h264_encoder->arguments->out_height-i-1) + j;
-                uint8_t value = *(picture_buf + index);
-                *(h264_encoder->pFrame->data[0] + (h264_encoder->arguments->out_width - (j-y_width_start_index) - 1)
-                                                  * h264_encoder->arguments->out_height +
-                  i) = value;
-            }
-        }
-        for (int i = 0; i < h264_encoder->arguments->out_height / 2; i++) {
-            for (int j = uv_width_start_index; j < h264_encoder->arguments->in_width / 2; j++) {
-                int index = h264_encoder->arguments->in_width / 2 * (h264_encoder->arguments->out_height/2-i-1) + j;
-                uint8_t v = *(picture_buf + in_y_size + index);
-                uint8_t u = *(picture_buf + in_y_size * 5 / 4 + index);
-                *(h264_encoder->pFrame->data[2] + (h264_encoder->arguments->out_width / 2 - (j-uv_width_start_index) - 1)
-                                                  * h264_encoder->arguments->out_height / 2 +
-                  i) = v;
-                *(h264_encoder->pFrame->data[1] + (h264_encoder->arguments->out_width / 2 - (j-uv_width_start_index) - 1)
-                                                  * h264_encoder->arguments->out_height / 2 +
-                  i) = u;
-            }
-        }
-    }
 }
 
 /**
