@@ -19,8 +19,12 @@ public:
 
     virtual ~RenderHolder() {
         if (eglDisplay != EGL_NO_DISPLAY) {
-            eglDestroySurface(eglDisplay, eglSurface);
-            eglDestroyContext(eglDisplay, eglContext);
+            if (eglSurface != EGL_NO_SURFACE) {
+                eglDestroySurface(eglDisplay, eglSurface);
+            }
+            if (eglContext != EGL_NO_CONTEXT) {
+                eglDestroyContext(eglDisplay, eglContext);
+            }
             eglTerminate(eglDisplay);
         }
 

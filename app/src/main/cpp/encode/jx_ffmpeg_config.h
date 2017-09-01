@@ -8,5 +8,5 @@
 
 #include <jni.h>
 jstring getEncoderConfigInfo(JNIEnv *env);
-
+void encodeFrame2H264(void* buffer);
 #endif //JIANXIFFMPEG_JX_FFMPEG_CONFIG_H

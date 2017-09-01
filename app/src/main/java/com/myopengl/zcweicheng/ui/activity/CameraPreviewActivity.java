@@ -18,6 +18,7 @@ import com.myopengl.zcweicheng.manager.CameraManager.CameraStateListener;
 import com.myopengl.zcweicheng.render.CameraTextureRender;
 import com.myopengl.zcweicheng.render.CameraTextureRender.CameraTextureRenderListener;
 import com.myopengl.zcweicheng.render.CameraTextureThread;
+import com.myopengl.zcweicheng.render.RecordCameraRender;
 import com.myopengl.zcweicheng.ui.TextureTouchListener;
 import com.myopengl.zcweicheng.ui.TextureTouchListener.onTextureTouchListener;
 
@@ -32,6 +33,7 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
 
     private CameraTextureRender mRender;
     private TextureView textureView;
+    private RecordCameraRender mRecorder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,9 +55,14 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                 button.setSelected(!isSelected);
                 if (mRender != null) {
                     if (isSelected) {
-                        mRender.stopRecord();
+//                        mRender.stopRecord();
+                        if (mRecorder != null) {
+                            mRecorder.release();
+                        }
                     } else {
-                        mRender.startRecord();
+//                        mRender.startRecord();
+                        mRecorder = new RecordCameraRender(360, 640, mRender.getShareTextrueId(),
+                                mRender.getShareContext(), mRender.getShareLocker());
                     }
                 }
             }
@@ -95,6 +102,13 @@ public class CameraPreviewActivity extends Activity implements TextureView.Surfa
                                 mRender.setCameraSize(width, height);
                             }
                         });
+            }
+
+            @Override
+            public void onFrameRendered() {
+                if (mRecorder != null) {
+                    mRecorder.process();
+                }
             }
         });
         mRender.setScale(true);

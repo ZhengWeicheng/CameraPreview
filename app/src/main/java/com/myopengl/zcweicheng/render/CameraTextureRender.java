@@ -26,6 +26,7 @@ public class CameraTextureRender {
         System.loadLibrary("swscale");
         System.loadLibrary("swresample");
         System.loadLibrary("avfilter");
+//        System.loadLibrary("x264");
         System.loadLibrary("native-lib");
     }
     private CameraTextureThread mCameraTextureThread;
@@ -71,7 +72,20 @@ public class CameraTextureRender {
         mCameraTextureThread.rotateCameraMatrix();
     }
 
+    public int getShareTextrueId() {
+        return mCameraTextureThread.getShareTextureId();
+    }
+
+    public long getShareContext() {
+        return mCameraTextureThread.getShareContext();
+    }
+
+    public Object getShareLocker() {
+        return mCameraTextureThread.getShareLocker();
+    }
+
     public interface CameraTextureRenderListener {
         void onInputTextureCreate(SurfaceTexture surfaceTexture, int width, int height);
+        void onFrameRendered();
     }
 }

@@ -50,6 +50,7 @@ public class EncodeHelper {
         if (mThread != null) {
             return;
         }
+        mBuffers.clear();
         mThread = new MyThread();
         mThread.start();
         isRecording = true;
@@ -82,7 +83,6 @@ public class EncodeHelper {
                 buffer.get(bytes);
                 FFmpegBridge.encodeFrame2H264(bytes);
             }
-            mBuffers.clear();
         }
     }
 }

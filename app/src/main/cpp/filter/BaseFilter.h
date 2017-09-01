@@ -68,6 +68,10 @@ protected:
 
     GLuint* mFrameBuffers;
     GLuint* mFrameBufferTextures;
+
+    void drawFrame(GLenum target, GLuint texture, const void *vertex, const void *fragment);
+
+    int drawToFrameBuffer(GLenum target, GLuint texture, const void *vertex, const void *fragment);
 };
 
 const GLfloat VERTICES_RENDER[] =
@@ -85,6 +89,33 @@ const GLfloat TEXTURE_RENDER[] =
                 1.0f, 1.0f,//tex1
                 0.0f, 1.0f,//tex2
                 0.0f, 0.0f,//tex3
+
+        };
+
+const GLfloat TEXTURE_90_RENDER[] =
+        {
+                1.0f, 1.0f,//tex1
+                0.0f, 1.0f,//tex2
+                0.0f, 0.0f,//tex3
+                1.0f, 0.0f,//tex0
+
+        };
+
+const GLfloat TEXTURE_180_RENDER[] =
+        {
+                0.0f, 1.0f,//tex2
+                0.0f, 0.0f,//tex3
+                1.0f, 0.0f,//tex0
+                1.0f, 1.0f,//tex1
+
+        };
+
+const GLfloat TEXTURE_270_RENDER[] =
+        {
+                0.0f, 0.0f,//tex3
+                1.0f, 0.0f,//tex0
+                1.0f, 1.0f,//tex1
+                0.0f, 1.0f,//tex2
 
         };
 #endif //MYOPENGL2_BASEFILTER_H

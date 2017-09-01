@@ -65,26 +65,39 @@ int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture) {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffers[0]);
-//    glViewport(0, 0, frameWidth, frameHeight);
+
     drawFrame(target, texture);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return mFrameBufferTextures[0];
 }
 
-void BaseFilter::drawFrame(GLenum target, GLuint texture) {
+int BaseFilter::drawToFrameBuffer(GLenum target, GLuint texture, const void *vertex, const void *fragment) {
+    if (mFrameBuffers == NULL) {
+        return 0;
+    }
 
+    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffers[0]);
+
+    drawFrame(target, texture, vertex, fragment);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return mFrameBufferTextures[0];
+}
+
+
+void BaseFilter::drawFrame(GLenum target, GLuint texture, const void *vertex, const void *fragment) {
     glUseProgram(programId);
 
-//    onPrepareToRender();
+    onPrepareToRender();
 
     //输入顶点
     glEnableVertexAttribArray(posAttrVertices);
-    glVertexAttribPointer(posAttrVertices, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), VERTICES_RENDER);
+    glVertexAttribPointer(posAttrVertices, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), vertex);
 
     //输入纹理坐标
     glEnableVertexAttribArray(posAttrTexCoords);
-    glVertexAttribPointer(posAttrTexCoords, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), TEXTURE_RENDER);
+    glVertexAttribPointer(posAttrTexCoords, 2, GL_FLOAT, GL_FALSE, 2* sizeof(GLfloat), fragment);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(target, texture);
@@ -98,6 +111,9 @@ void BaseFilter::drawFrame(GLenum target, GLuint texture) {
     onDrawArraysAfter();
 
     glBindTexture(target, 0);
+}
+void BaseFilter::drawFrame(GLenum target, GLuint texture) {
+    drawFrame(target, texture, VERTICES_RENDER, TEXTURE_RENDER);
 }
 
 

@@ -15,6 +15,12 @@ using namespace std;
 /**
  * yuv编码h264
  */
+typedef struct YUVData {
+    uint8_t * yData;
+    uint8_t * uData;
+    uint8_t * vData;
+};
+
 class JXYUVEncodeH264 {
 public:
     JXYUVEncodeH264(UserArguments* arg);
@@ -32,29 +38,19 @@ public:
     int encodeEnd();
 
     ~JXYUVEncodeH264() {
-
         //Clean
-        if (video_st != NULL) {
-            avcodec_close(video_st->codec);
-            av_free(pFrame);
-            video_st = NULL;
-            pFrame = NULL;
-        }
-        if (pFormatCtx != NULL) {
-            av_write_trailer(pFormatCtx);
-            avio_close(pFormatCtx->pb);
-            avformat_free_context(pFormatCtx);
-            pFormatCtx = NULL;
-        }
-
-        if (swsContext != NULL) {
-            sws_freeContext(swsContext);
-            swsContext = NULL;
-        }
-        if (pFrameRGBA != NULL) {
-            av_free(pFrameRGBA);
-            pFrameRGBA = NULL;
-        }
+//        if (video_st != NULL) {
+//            avcodec_close(video_st->codec);
+//            av_free(pFrame);
+//            video_st = NULL;
+//            pFrame = NULL;
+//        }
+//        if (pFormatCtx != NULL) {
+//            av_write_trailer(pFormatCtx);
+//            avio_close(pFormatCtx->pb);
+//            avformat_free_context(pFormatCtx);
+//            pFormatCtx = NULL;
+//        }
     }
 
 private:
@@ -77,8 +73,7 @@ private:
     int out_y_size;
     int framecnt = 0;
     int frame_count = 0;
-    SwsContext* swsContext;
-    AVFrame *pFrameRGBA;
+    int frame_count1 = 0;
 
 
 };

@@ -38,26 +38,26 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeInit(JNIEnv *env, 
 
 //    holder->mCameraFilter->initPixelBuffer(width, height);
 
-    const char* baseVertex = getGLSLStr(mgr, "ext_vertex.glsl");
-    const char* baseFragment = getGLSLStr(mgr, "ext_fragment.glsl");
-    holder->mFilter->create(baseVertex, baseFragment);
-    if (!holder->mFilter->isProgramAvailable()) {
-        delete holder;
-        return 0;
-    }
-    holder->mRecordFilter->create(baseVertex, baseFragment);
-    if (!holder->mRecordFilter->isProgramAvailable()) {
-        delete holder;
-        return 0;
-    }
-
-    holder->mRecordFilter->initFramebuffer(544, 960);
-
-    holder->mRecordFilter->initPixelBuffer(544, 960);
-
-    holder->mFilter->setFrameSize(width, height);
-    holder->mRecordFilter->setFrameSize(544, 960);
-    holder->mCameraFilter->setFrameSize(width, height);
+//    const char* baseVertex = getGLSLStr(mgr, "ext_vertex.glsl");
+//    const char* baseFragment = getGLSLStr(mgr, "ext_fragment.glsl");
+//    holder->mFilter->create(baseVertex, baseFragment);
+//    if (!holder->mFilter->isProgramAvailable()) {
+//        delete holder;
+//        return 0;
+//    }
+//    holder->mRecordFilter->create(baseVertex, baseFragment);
+//    if (!holder->mRecordFilter->isProgramAvailable()) {
+//        delete holder;
+//        return 0;
+//    }
+//
+//    holder->mRecordFilter->initFramebuffer(360, 640);
+//
+//    holder->mRecordFilter->initPixelBuffer(360, 640);
+//
+//    holder->mFilter->setFrameSize(width, height);
+//    holder->mRecordFilter->setFrameSize(360, 640);
+//    holder->mCameraFilter->setFrameSize(width, height);
 
     holder->updatImageMethodId = getSurfaceUpdateImageMethodId(env);
 
@@ -124,12 +124,13 @@ Java_com_myopengl_zcweicheng_render_CameraTextureThread_nativeDraw(JNIEnv *env, 
 
     holder->mCameraFilter->setDistanceAndNextFilter(distance, nextFilterId);
 
-    int textureId = holder->mCameraFilter->drawToFrameBuffer(GL_TEXTURE_EXTERNAL_OES,
-            holder->textures[0], mverMatrix, mTmpMatrix);
+    holder->mCameraFilter->drawFrame(GL_TEXTURE_EXTERNAL_OES, holder->textures[0], mverMatrix, mTmpMatrix);
 
-    holder->mFilter->drawFrame(GL_TEXTURE_2D, (GLuint) textureId);
-
-    holder->mRecordFilter->drawToFrameBuffer(GL_TEXTURE_2D, (GLuint) textureId);
+//    holder->mFilter->drawFrame(GL_TEXTURE_2D, (GLuint) textureId);
+//
+//    if (holder->mRecordFilter->isEncode) {
+//        holder->mRecordFilter->drawToFrameBuffer(GL_TEXTURE_2D, (GLuint) textureId);
+//    }
 
     eglSwapBuffers(holder->eglDisplay, holder->eglSurface);
 

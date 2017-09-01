@@ -15,8 +15,6 @@ JXYUVEncodeH264::JXYUVEncodeH264(UserArguments *arg) : arguments(arg) {
     video_st = NULL;
     pFrame = NULL;
     pFormatCtx = NULL;
-    swsContext = NULL;
-    pFrameRGBA = NULL;
 }
 
 /**
@@ -156,18 +154,6 @@ int JXYUVEncodeH264::initVideoEncoder() {
     avpicture_fill((AVPicture *) pFrame, buf, pCodecCtx->pix_fmt, pCodecCtx->width,
                    pCodecCtx->height);
 
-//    swsContext = sws_alloc_context();
-//
-//    swsContext = sws_getContext(pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGBA,
-//          pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
-
-    pFrameRGBA= av_frame_alloc();
-    int len = avpicture_get_size(AV_PIX_FMT_RGBA, pCodecCtx->width, pCodecCtx->height);
-
-    uint8_t * out_buffer = (uint8_t *)av_malloc(len);
-
-    avpicture_fill((AVPicture *)pFrameRGBA, out_buffer, AV_PIX_FMT_RGBA, pCodecCtx->width, pCodecCtx->height);
-
     //Write File Header
     avformat_write_header(pFormatCtx, NULL);
     av_new_packet(&pkt, picture_size);
@@ -187,11 +173,31 @@ int JXYUVEncodeH264::initVideoEncoder() {
  * @return
  */
 int JXYUVEncodeH264::startSendOneFrame(void *buf) {
-    int in_y_size = arguments->in_width * arguments->in_height;
-    uint8_t *new_buf = (uint8_t *) malloc(in_y_size * 4);
-    memcpy(new_buf, (uint8_t *)buf, in_y_size * 4);
+    LOGI(JNI_DEBUG, "start copy");
+    size_t size = (size_t) (arguments->in_width * arguments->in_height * 4);
+    uint8_t *new_buf = (uint8_t *) malloc(size);
+    memcpy(new_buf, buf, size);
+    LOGI(JNI_DEBUG, "end copy");
+    frame_queue.push((uint8_t *) new_buf);
 
-    frame_queue.push(new_buf);
+//    LOGI(JNI_DEBUG, "start yuv change");
+//    YUVData *yuvData = (YUVData *) malloc(sizeof(YUVData));
+//    yuvData->yData = (uint8_t *) malloc(in_y_size);
+//    yuvData->uData = (uint8_t *) malloc(in_y_size/4);
+//    yuvData->vData = (uint8_t *) malloc(in_y_size/4);
+//    /**
+//    * 这里RGBA转YUV需要注意UV分量pFrame->data[2]是U分量，pFrame->data[1]是V分量
+//    */
+//    LOGI(JNI_DEBUG, "start yuv change");
+//    libyuv::ARGBToI420((const uint8 *) buf, arguments->in_width * 4,
+//                       yuvData->yData, arguments->in_width,
+//                       yuvData->uData, arguments->in_width/2,
+//                       yuvData->vData, arguments->in_width/2,
+//                       arguments->in_width,
+//                       arguments->in_height);
+//
+//    LOGI(JNI_DEBUG, "end yuv change");
+//    frame_queue.push(yuvData);
 
     return 0;
 }
@@ -209,6 +215,15 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
     while (!h264_encoder->is_end||!h264_encoder->frame_queue.empty()) {
         if(h264_encoder->is_release){
             //Write file trailer
+            av_write_trailer(h264_encoder->pFormatCtx);
+
+            //Clean
+            if (h264_encoder->video_st) {
+                avcodec_close(h264_encoder->video_st->codec);
+                av_free(h264_encoder->pFrame);
+            }
+            avio_close(h264_encoder->pFormatCtx->pb);
+            avformat_free_context(h264_encoder->pFormatCtx);
             delete h264_encoder;
             h264_encoder = NULL;
             return 0;
@@ -216,19 +231,22 @@ void *JXYUVEncodeH264::startEncode(void *obj) {
         if (h264_encoder->frame_queue.empty()) {
             continue;
         }
-        uint8_t *picture_buf = *h264_encoder->frame_queue.wait_and_pop().get();
+        uint8_t * picture_buf = *h264_encoder->frame_queue.wait_and_pop().get();
         LOGI(JNI_DEBUG, "send_videoframe_count:%d", h264_encoder->frame_count);
-
-        LOGI(JNI_DEBUG, "start RGBAToI420");
-
-        int result = libyuv::ARGBToI420(picture_buf, h264_encoder->arguments->in_width*4,
+//        LOGI(JNI_DEBUG, "start copy data");
+//        memcpy(h264_encoder->pFrame->data[0], yuvData->yData, (size_t) h264_encoder->out_y_size);
+//        memcpy(h264_encoder->pFrame->data[2], yuvData->uData, (size_t) (h264_encoder->out_y_size / 4));
+//        memcpy(h264_encoder->pFrame->data[1], yuvData->vData, (size_t) (h264_encoder->out_y_size / 4));
+        LOGI(JNI_DEBUG, "start yuv");
+        libyuv::ARGBToI420(picture_buf, h264_encoder->arguments->in_width*4,
                    h264_encoder->pFrame->data[0], h264_encoder->arguments->in_width,
                    h264_encoder->pFrame->data[2], h264_encoder->arguments->in_width/2,
                    h264_encoder->pFrame->data[1], h264_encoder->arguments->in_width/2,
                    h264_encoder->arguments->in_width,
                    h264_encoder->arguments->in_height);
-        LOGI(JNI_DEBUG, "end RGBAToI420 result = %d", result);
-        delete (picture_buf);
+
+        LOGI(JNI_DEBUG, "end yuv");
+        free(picture_buf);
 
         //PTS
         h264_encoder->pFrame->pts = h264_encoder->frame_count;
@@ -268,9 +286,20 @@ int JXYUVEncodeH264::encodeEnd() {
         LOGE(JNI_DEBUG, "Flushing encoder failed\n");
         return -1;
     }
+    //Write file trailer
+    av_write_trailer(pFormatCtx);
+
+    //Clean
+    if (video_st) {
+        avcodec_close(video_st->codec);
+        av_free(pFrame);
+//        av_free(picture_buf);
+    }
+    avio_close(pFormatCtx->pb);
+    avformat_free_context(pFormatCtx);
     LOGI(JNI_DEBUG, "视频编码结束")
     arguments->handler->setup_video_state(END_STATE);
-//    arguments->handler->try_encode_over(arguments);
+    arguments->handler->try_encode_over(arguments);
 
     return 1;
 }

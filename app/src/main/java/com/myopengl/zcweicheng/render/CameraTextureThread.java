@@ -16,7 +16,6 @@ import android.view.Surface;
 
 import com.myopengl.zcweicheng.MyApp;
 import com.myopengl.zcweicheng.Utils.AssetsUtils;
-import com.myopengl.zcweicheng.encode.EncodeHelper;
 import com.myopengl.zcweicheng.encode.FFmpegBridge;
 import com.myopengl.zcweicheng.manager.CameraManager;
 
@@ -36,6 +35,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     static final int MSG_SET_CAMERA_SIZE = 4;
     static final int MSG_SET_DISTANCE = 5;
     static final int MSG_SET_FILTER_ID = 6;
+    static final int MSG_PROCESS = 7;
     private Handler mHandler;
     private Surface mOutputSurface;
     private int mWidth;
@@ -43,7 +43,6 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private int mTextureId;
     private SurfaceTexture mInputTexture;
     private final float[] mTmpMatrix = new float[16];
-    private int mFrameNum;
     private boolean isScale;
     private CameraTextureRender.CameraTextureRenderListener mListener;
     private int mCameraIndex;
@@ -60,6 +59,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private float mFilterId;
     private long enginId;
     private boolean exit;
+    private final Object mLocker = new Object();
 
     public CameraTextureThread() {
         super("VideoTextureRenderThread");
@@ -154,43 +154,60 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        if (enginId == 0 || mInputTexture == null || exit) {
-            Log.d(TAG, "Skipping drawFrame after shutdown");
-            return;
+        synchronized (mLocker) {
+            if (enginId == 0 || mInputTexture == null || exit) {
+                Log.d(TAG, "Skipping drawFrame after shutdown");
+                return;
+            }
+            // Latch the next frame from the camera.
+            mInputTexture.getTransformMatrix(mTmpMatrix);
+            if (isScale) {
+                Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
+            }
+            nativeDraw(surfaceTexture, mverMatrix, mTmpMatrix, mDistance, mFilterId, enginId);
+            if (mListener != null) {
+                mListener.onFrameRendered();
+            }
+//        long spend = SystemClock.elapsedRealtime() - mFrameUpdateTime;
+//        if (spend < FRAME_THRESHOLD) {
+//            SystemClock.sleep(FRAME_THRESHOLD - spend);
+//        }
+//        mFrameUpdateTime = SystemClock.elapsedRealtime();
         }
-        // Latch the next frame from the camera.
-        mInputTexture.getTransformMatrix(mTmpMatrix);
-        if (isScale) {
-            Matrix.scaleM(mTmpMatrix, 0, 1f*mCameraSurfaceWith/mWidth, 1f, 1f);
-        }
-        nativeDraw(surfaceTexture, mverMatrix, mTmpMatrix, mDistance, mFilterId, enginId);
-        long spend = SystemClock.elapsedRealtime() - mFrameUpdateTime;
-        if (spend < FRAME_THRESHOLD) {
-            SystemClock.sleep(FRAME_THRESHOLD - spend);
-        }
-        mFrameUpdateTime = SystemClock.elapsedRealtime();
+    }
+
+    public int getShareTextureId() {
+        return nativeGetInputTex(enginId);
+    }
+
+    public long getShareContext() {
+        return nativeGetEglContext(enginId);
+    }
+
+    public Object getShareLocker() {
+        return mLocker;
     }
 
     public void startEncode() {
-        if (enginId == 0) {
-            Log.d(TAG, "START ENCODE ERROR");
-            return;
-        }
-        FFmpegBridge.prepareJXFFmpegEncoder(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                String.valueOf(System.currentTimeMillis()), 0, 544, 960, 544, 960, 25, 500000);
-        startRecord(enginId, Environment.getExternalStorageDirectory().getAbsolutePath(),
-                String.valueOf(System.currentTimeMillis()), 0, 544, 960, 544, 960, 20, 500000);
-        encodeHelper.start();
+//        if (enginId == 0) {
+//            Log.d(TAG, "START ENCODE ERROR");
+//            return;
+//        }
+//        FFmpegBridge.prepareJXFFmpegEncoder(Environment.getExternalStorageDirectory().getAbsolutePath(),
+//                String.valueOf(System.currentTimeMillis()), 0, 360, 640, 360, 640, 30, 500000);
+//        startRecord(enginId, Environment.getExternalStorageDirectory().getAbsolutePath(),
+//                String.valueOf(System.currentTimeMillis()), 0, 360, 640, 360, 640, 30, 500000);
+//        encodeHelper.start();
     }
 
     public void stopEncode() {
-        if (enginId == 0) {
-            Log.d(TAG, "stopEncode ERROR");
-            return;
-        }
-        stopRecord(enginId);
-        FFmpegBridge.recordEnd();
-        encodeHelper.stop();
+//        if (enginId == 0) {
+//            Log.d(TAG, "stopEncode ERROR");
+//            return;
+//        }
+//        stopRecord(enginId);
+//        FFmpegBridge.recordEnd();
+//        encodeHelper.stop();
     }
 
 //    private static native long nativeInit(Surface surface, String vertex, String fragment);
@@ -226,23 +243,15 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
     private static native int nativeGetInputTex(long engine);
     private static native long nativeGetEglContext(long engine);
 
-    /**
-     * 底层回调
-     */
-    public static synchronized void notifyState() {
-        ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, 720*1180, GLES30.GL_MAP_READ_BIT);
-//        byte[] bytes = new byte[720*1180];
-//        byteBuffer.get(bytes);
-        Log.d("aaa", "notifyState");
-    }
-
-    public static EncodeHelper encodeHelper = new EncodeHelper();
-    public static final int FRAME_RATE = 25;
+//    public static EncodeHelper encodeHelper = new EncodeHelper();
+    public static final int FRAME_RATE = 30;
     public static final int FRAME_THRESHOLD = 1000/FRAME_RATE;
     private static long mFrameUpdateTime;
     public static synchronized void onFrameAvailable(int size) {
         ByteBuffer byteBuffer = (ByteBuffer) GLES30.glMapBufferRange(GLES30.GL_PIXEL_PACK_BUFFER, 0, size, GLES30.GL_MAP_READ_BIT);
-        encodeHelper.onRecord(byteBuffer, size);
+
+
+//        encodeHelper.onRecord(byteBuffer, size);
 
 //        if (count == 20) {
 //            BufferedOutputStream bos = null;
@@ -254,7 +263,7 @@ public class CameraTextureThread extends HandlerThread implements Handler.Callba
 //                    file.createNewFile();
 //                }
 //                bos = new BufferedOutputStream(new FileOutputStream(file));
-//                Bitmap bmp = Bitmap.createBitmap(544, 960, Bitmap.Config.ARGB_8888);
+//                Bitmap bmp = Bitmap.createBitmap(360, 640, Bitmap.Config.ARGB_8888);
 //                bmp.copyPixelsFromBuffer(byteBuffer);
 //                bmp.compress(Bitmap.CompressFormat.PNG, 90, bos);
 //                bmp.recycle();

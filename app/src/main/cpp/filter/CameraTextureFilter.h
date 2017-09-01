@@ -33,9 +33,6 @@ public:
     }
 
     virtual  ~CameraTextureFilter() {
-        if (mPixelBuffers != NULL) {
-            destroyPixelBuffer();
-        }
         if (h264_encoder != NULL) {
             delete(h264_encoder);
             h264_encoder = NULL;
@@ -56,13 +53,7 @@ public:
 
     void setMatrix(jfloat * mverMatrix, jfloat * mTmpMatrix);
 
-    void initPixelBuffer(int width, int height);
-
-    void destroyPixelBuffer();
-
-    void bindPixelBuffer();
-
-    void unbindPixelBuffer();
+    virtual void drawFrame(GLenum target, GLuint texture, jfloat *mverMatrix, jfloat *mTmpMatrix);
 
     void setFrameSize(int width, int height);
 

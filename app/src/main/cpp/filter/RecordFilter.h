@@ -75,6 +75,8 @@ public:
     void endRecord();
 
     void end_notify();
+
+    static void encodeFrame(void *obj);
 public:
     bool isEncode;
     int mRowStride;

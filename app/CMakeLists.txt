@@ -24,10 +24,12 @@ add_library( # Sets the name of the library.
                 #============render=================
                 src/main/cpp/render/DataRender.cpp
                 src/main/cpp/render/TextureRender.cpp
+                src/main/cpp/render/RecordCameraRender.cpp
                 #============filter=================
                 src/main/cpp/filter/BaseFilter.cpp
                 src/main/cpp/filter/CameraTextureFilter.cpp
                 src/main/cpp/filter/RecordFilter.cpp
+                src/main/cpp/filter/RecordCameraFilter.cpp
                 #==============encoder==================
                 src/main/cpp/encode/jx_yuv_encode_h264.cpp
                 src/main/cpp/encode/jx_pcm_encode_aac.cpp
@@ -42,6 +44,8 @@ add_library( # Sets the name of the library.
                 src/main/cpp/encode/ffmpeg_opt.c
                 src/main/cpp/encode/jx_ffmpeg_cmd_run.c
                 src/main/cpp/encode/jx_ffmpeg_config.cpp
+
+                #src/main/cpp/h264encoder/X264Encoder.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -159,6 +163,20 @@ ${CMAKE_SOURCE_DIR}/src/main/cpp/libyuv/include/
 )
 #===================================lib yuv =======================================
 
+#=================================== x264 =======================================
+# add_library(
+#            x264
+#             SHARED
+#             IMPORTED
+#             )
+#
+#set_target_properties(
+#         x264
+#         PROPERTIES IMPORTED_LOCATION
+#          ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libx264.so
+#          )
+#=================================== x264 =======================================
+
 find_library( # Sets the name of the path variable.
               log-lib
 
@@ -184,4 +202,5 @@ target_link_libraries( # Specifies the target library.
                        swresample
                        swscale
                        libYUV
+                       #x264
                        )
